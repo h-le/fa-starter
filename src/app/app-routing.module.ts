@@ -1,10 +1,10 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { ExampleComponent } from './example/example.component';
+import {NgModule} from '@angular/core';
+import {Routes, RouterModule} from '@angular/router';
+import {ExampleComponent} from './example/example.component';
 
 const routes: Routes = [
-  { path: 'example/', component: ExampleComponent },
-  { path: '**', redirectTo: 'example/' },
+  {path: 'example/', component: ExampleComponent},
+  {path: '**', redirectTo: 'example/'},
 ];
 
 @NgModule({

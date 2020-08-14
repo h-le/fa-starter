@@ -17,5 +17,8 @@
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true,
     "strictNullChecks": true
-  }
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }
