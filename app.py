@@ -115,6 +115,13 @@ def auth_redirect():
             'grant_type': 'authorization_code'},
         decoder=oauth_decode)
 
+    """
+    response = session.get(
+        'songs/{id}'.format(id=1929408))
+
+    return response.json()['response']['song']['embed_content']
+    """
+
     songs = []
     page_num = 0
 
