@@ -115,7 +115,28 @@ def auth_redirect():
             'grant_type': 'authorization_code'},
         decoder=oauth_decode)
 
-    response = session.get(
-        'songs/{id}'.format(id=1929408))
+    songs = []
+    page_num = 0
 
-    return response.json()['response']['song']['embed_content']
+    while True:
+        response = session.get(
+            'search',
+            params={
+                'q': 'beach house',
+                'page': page_num})
+
+        page_hits = response.json()['response']['hits']
+
+        if not page_hits:
+            break
+
+        for hit in page_hits:
+            if hit['type'] == 'song':
+                if hit['result']['primary_artist']['name'].strip().lower() == \
+                'beach house':
+                    full_title = hit['result']['full_title']
+                    songs.append(full_title)
+
+        page_num = page_num + 1
+
+    return flask.render_template('songs.html', songs=songs)
