@@ -9,8 +9,8 @@ from rauth import OAuth2Service
 
 import example
 
-CLIENT_ID = os.environ.get('GENIUS_CLIENT_ID')
-CLIENT_SECRET = os.environ.get('GENIUS_CLIENT_SECRET')
+CLIENT_ID = os.getenv('GENIUS_CLIENT_ID')
+CLIENT_SECRET = os.getenv('GENIUS_CLIENT_SECRET')
 
 AUTHORIZE_URL = 'https://api.genius.com/oauth/authorize'
 ACCESS_TOKEN_URL = 'https://api.genius.com/oauth/token'
@@ -18,6 +18,7 @@ BASE_URL = 'https://api.genius.com/'
 
 # TODO Get/set this another way
 REDIRECT_URI = 'http://localhost:5000/in'
+# REDIRECT_URI = 'https://teak-catwalk-286222.wl.r.appspot.com/in'
 
 load_dotenv()
 
@@ -115,13 +116,20 @@ def auth_redirect():
             'grant_type': 'authorization_code'},
         decoder=oauth_decode)
 
-    """
     response = session.get(
         'songs/{id}'.format(id=1929408))
 
-    return response.json()['response']['song']['embed_content']
-    """
+    lyrics = response.json()['response']['song']['embed_content']
 
+    audio_snippet = response.json()['response']['song'] \
+    ['apple_music_player_url']
+
+    return flask.render_template(
+        'song.html',
+        lyrics=lyrics,
+        audio_snippet=audio_snippet)
+
+    """
     songs = []
     page_num = 0
 
@@ -147,3 +155,4 @@ def auth_redirect():
         page_num = page_num + 1
 
     return flask.render_template('songs.html', songs=songs)
+    """
