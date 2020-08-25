@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Starter App</title>
+    <style>
+      .inline {
+        display: inline;
+      }
+      .link-button {
+        background: none;
+        border: none;
+        color: grey;
+        cursor: pointer;
+        font-size: 1em;
+        font-family: serif;
+      }
+      .link-button:focus {
+        outline: none;
+      }
+      .link-button:active {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h3 style="text-align: center;">
+      {{song.title}} by {{song.primary_artist.name}}
+      <form method="post" action="/like" class="inline">
+        <input type="hidden" name="song" value="{{song}}" />
+        <button type="submit" class="link-button">
+          +
+        </button>
+      </form>
+    </h3>
+    <object data="{{song.apple_music_player_url}}" width="100%"></object>
+    {{song.embed_content|safe}}
+  </body>
+</html>
