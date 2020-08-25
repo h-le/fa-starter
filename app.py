@@ -1,24 +1,11 @@
 """Angular+Flask AppEnginer Starter App"""
 import os
 
-import json
 import flask
 import flask_cors
 from dotenv import load_dotenv
-from rauth import OAuth2Service
 
 import example
-
-CLIENT_ID = os.getenv('GENIUS_CLIENT_ID')
-CLIENT_SECRET = os.getenv('GENIUS_CLIENT_SECRET')
-
-AUTHORIZE_URL = 'https://api.genius.com/oauth/authorize'
-ACCESS_TOKEN_URL = 'https://api.genius.com/oauth/token'
-BASE_URL = 'https://api.genius.com/'
-
-# TODO Get/set this another way
-REDIRECT_URI = 'http://localhost:5000/in'
-# REDIRECT_URI = 'https://teak-catwalk-286222.wl.r.appspot.com/in'
 
 load_dotenv()
 
@@ -26,6 +13,7 @@ load_dotenv()
 app = flask.Flask(__name__,
                   static_folder='dist/client',
                   static_url_path='/client/')
+
 app.register_blueprint(example.blueprint)
 
 # If we're running in debug, defer to the typescript development server
@@ -45,11 +33,6 @@ else:
 # Set the secret key to enable access to session data.
 app.secret_key = os.urandom(24)
 
-# TODO Remove when removing user-level auth code
-def oauth_decode(data):
-    """Decode UTF-8 and JSON"""
-    return json.loads(data.decode('utf-8', 'strict'))
-
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve_angular(path):
@@ -66,93 +49,3 @@ def serve_angular(path):
         ])
         return flask.redirect(target)
     return flask.send_file('dist/client/index.html')
-
-@app.route('/login')
-def login():
-    """'Login' page for auth flow"""
-    return '<a href="/auth">Authorize</a>'
-
-@app.route('/auth')
-def oauth_flow():
-    """Redirect for user authorization"""
-    genius = OAuth2Service(
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        name='genius',
-        authorize_url=AUTHORIZE_URL,
-        access_token_url=ACCESS_TOKEN_URL,
-        base_url=BASE_URL)
-
-    redirect_uri = REDIRECT_URI
-
-    # TODO Define a better state
-    state = 'state'
-
-    params = {
-        'scope': 'me',
-        'response_type': 'code',
-        'redirect_uri': redirect_uri,
-        'state': state}
-
-    authorize_url = genius.get_authorize_url(**params)
-
-    return flask.redirect(authorize_url)
-
-@app.route('/in')
-def auth_redirect():
-    """_Authorization successful_; display song lyrics to test acces token"""
-    genius = OAuth2Service(
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        name='genius',
-        authorize_url=AUTHORIZE_URL,
-        access_token_url=ACCESS_TOKEN_URL,
-        base_url=BASE_URL)
-
-    session = genius.get_auth_session(
-        data={
-            'code': flask.request.args.get('code'),
-            'redirect_uri': REDIRECT_URI,
-            'grant_type': 'authorization_code'},
-        decoder=oauth_decode)
-
-    response = session.get(
-        'songs/{id}'.format(id=1929408))
-
-    lyrics = response.json()['response']['song']['embed_content']
-
-    audio_snippet = response.json()['response']['song'] \
-    ['apple_music_player_url']
-
-    return flask.render_template(
-        'song.html',
-        lyrics=lyrics,
-        audio_snippet=audio_snippet)
-
-    """
-    songs = []
-    page_num = 0
-
-    while True:
-        response = session.get(
-            'search',
-            params={
-                'q': 'beach house',
-                'page': page_num})
-
-        page_hits = response.json()['response']['hits']
-
-        if not page_hits:
-            break
-
-        for hit in page_hits:
-            if hit['type'] == 'song':
-                if hit['result']['primary_artist']['name'].strip().lower() == \
-                'beach house':
-                    full_title = hit['result']['full_title']
-                    songs.append(full_title)
-
-        page_num = page_num + 1
-
-    return flask.render_template('songs.html', songs=songs)
-    """
