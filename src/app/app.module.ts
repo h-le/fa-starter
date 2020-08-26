@@ -10,6 +10,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MaterialModule} from './material/material.module';
 import {ExampleComponent} from './example/example.component';
 
+import {SongService} from './services/song.service';
+
 @NgModule({
   declarations: [AppComponent, ExampleComponent],
   imports: [
@@ -21,6 +23,7 @@ import {ExampleComponent} from './example/example.component';
     HttpClientModule,
   ],
   providers: [
+    SongService,
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: {appearance: 'fill'},
