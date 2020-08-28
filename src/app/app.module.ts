@@ -8,12 +8,12 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MaterialModule} from './material/material.module';
-import {ExampleComponent} from './example/example.component';
 
 import {SongService} from './services/song.service';
+import {SongComponent} from './song/song.component';
 
 @NgModule({
-  declarations: [AppComponent, ExampleComponent],
+  declarations: [AppComponent, SongComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
