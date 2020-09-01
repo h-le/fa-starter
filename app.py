@@ -125,13 +125,13 @@ def auth_redirect():
     if response.status_code != 200:
         flask.abort(502, 'Invalid response from Genius API')
 
+    # TODO Will eventually be working with `flask.request.json`
     song = response.json()['response']['song']
 
-    # TODO Will replace with checking for `field` in flask.request.json
     if 'embed_content' not in song:
         flask.abort(400, 'Song must contain `embed_content`')
 
-    # TODO Will _get_ `field` value like flask.request.get(<field>)
+    # TODO Will get value like `flask.request.json.get(<field>, 'default')`
     lyrics = song['embed_content']
 
     if 'apple_music_player_url' not in song:
