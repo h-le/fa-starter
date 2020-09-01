@@ -1,11 +1,11 @@
-"""Angular+Flask AppEnginer Starter App"""
+"""Angular+Flask AppEngine Starter App"""
 import os
 
 import json
+import rauth
 import flask
 import flask_cors
 from dotenv import load_dotenv
-from rauth import OAuth2Service
 
 import example
 
@@ -75,7 +75,7 @@ def login():
 @app.route('/auth')
 def oauth_flow():
     """Redirect for user authorization"""
-    genius = OAuth2Service(
+    genius = rauth.OAuth2Service(
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
         name='genius',
@@ -100,8 +100,8 @@ def oauth_flow():
 
 @app.route('/in')
 def auth_redirect():
-    """_Authorization successful_; display song lyrics to test acces token"""
-    genius = OAuth2Service(
+    """_Authorization successful_; display song lyrics to test access token"""
+    genius = rauth.OAuth2Service(
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
         name='genius',
