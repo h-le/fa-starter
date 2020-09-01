@@ -1,4 +1,4 @@
-"""Angular+Flask AppEnginer Starter App"""
+"""Angular+Flask AppEngine Starter App"""
 import os
 
 import flask
