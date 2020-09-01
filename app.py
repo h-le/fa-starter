@@ -2,13 +2,13 @@
 import os
 
 import ast
+import json
+import random # TODO (2) Remove along with (1)
 import flask
 import flask_cors
 from dotenv import load_dotenv
 from google.cloud import datastore
 import requests
-
-#import example
 
 load_dotenv()
 
@@ -16,8 +16,6 @@ load_dotenv()
 app = flask.Flask(__name__,
                   static_folder='dist/client',
                   static_url_path='/client/')
-
-#app.register_blueprint(example.blueprint)
 
 # If we're running in debug, defer to the typescript development server
 # This gets us things like live reload and better sourcemaps.
@@ -36,42 +34,85 @@ else:
 # Set the secret key to enable access to session data.
 app.secret_key = os.urandom(24)
 
+# Datastore client
 client = datastore.Client()
 
+# Client access token for Genius API
 GENIUS_ACCESS_TOKEN = os.getenv('GENIUS_ACCESS_TOKEN')
 
 @app.route('/home')
-def recommend():
-    """Recommend a song"""
-    headers = {
-        'Authorization': 'Bearer {token}'.format(token=GENIUS_ACCESS_TOKEN)}
+def home():
+    """Home(???)"""
+    url = '{app_url}/'.format(app_url=app.config['API_URL'])
 
-    # Hard-coding a song recommendation
-    url = 'https://api.genius.com/'
-    endpoint = 'songs/'
+    response = requests.get(url='{}/_recommend'.format(url))
 
-    # Song ID for 'Space Song' by Beach House
-    song_id = '1929412'
-
-    response = requests.get(
-        url + endpoint + song_id,
-        headers=headers)
-
-    song = response.json()['response']['song']
+    song = json.loads(response.text)
 
     return flask.render_template('index.html', song=song)
 
-@app.route('/likes')
+@app.route('/_recommend')
+def get_recommendation():
+    """
+    Recommends a song via Genius API (https://genius.com/developers)
+
+    Song recommendation (dict):
+      - album (string): Album name
+      - apple_music_player_url (string): Apple music player URL
+      - artist (string): Artist name
+      - embed_content (string): Embedded song lyrics via Genius
+      - song_art_image_thumbnail_url (string): Song art thumbnail URL
+      - title (string): Song title
+    """
+    headers = {
+        'Authorization': 'Bearer {token}'.format(token=GENIUS_ACCESS_TOKEN)}
+
+    url = 'https://api.genius.com/'
+    endpoint = 'songs/'
+
+    # TODO (1) Generate 'song_id'
+    song_id = random.choice(
+        [
+            '1929408', # Levitation by Beach House
+            '1929412', # Space Song by Beach House
+            '5059926', # Time Alone with You by Jacob Collier
+            '5565895', # All I Need by Jacob Collier, Mahalia & Ty Dolla $ign
+            '901533',  # I'm the Man, That Will Find You by Connan Mockasin
+            '2911300', # I Wanna Roll With You by Connan Mockasin
+            '188792',  # Easy Easy by King Krule
+            '3234164'  # Logos by King Krule
+        ]) # For the time being, hard-coding list of 'song_id's
+
+    response = requests.get(
+        url='{url}{endpoint}{song_id}'.format(
+            url=url,
+            endpoint=endpoint,
+            song_id=song_id),
+        headers=headers)
+
+    song = json.loads(response.text)['response']['song']
+
+    recommendation = {
+        'album': song['album']['name'],
+        'apple_music_player_url': song['apple_music_player_url'],
+        'artist': song['primary_artist']['name'],
+        'embed_content': song['embed_content'],
+        'song_art_image_thumbnail_url': song['song_art_image_thumbnail_url'],
+        'title': song['title']}
+
+    return flask.jsonify(recommendation)
+
+@app.route('/_likes')
 def get_likes():
-    """Get liked songs"""
+    """Get liked songs (array) from datastore"""
     kind = 'LikedSong'
 
     query = client.query(kind=kind)
     songs = list(query.fetch())
 
-    return flask.render_template('likes.html', songs=songs)
+    return flask.jsonify(songs)
 
-@app.route('/like', methods=['POST'])
+@app.route('/_like', methods=['POST'])
 def add_like():
     """Like a song"""
     if flask.request.method == 'POST':
@@ -86,7 +127,8 @@ def add_like():
                 'apple_music_player_url': song['apple_music_player_url'],
                 'artist': song['primary_artist']['name'],
                 'embed_content': song['embed_content'],
-                'song_art_image_thumbnail_url': song['song_art_image_thumbnail_url'],
+                'song_art_image_thumbnail_url': \
+                    song['song_art_image_thumbnail_url'],
                 'title': song['title']})
 
             client.put(likedsong)
