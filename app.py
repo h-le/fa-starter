@@ -12,13 +12,12 @@ import example
 CLIENT_ID = os.getenv('GENIUS_CLIENT_ID')
 CLIENT_SECRET = os.getenv('GENIUS_CLIENT_SECRET')
 
-AUTHORIZE_URL = 'https://api.genius.com/oauth/authorize'
-ACCESS_TOKEN_URL = 'https://api.genius.com/oauth/token'
-BASE_URL = 'https://api.genius.com/'
+AUTHORIZE_URL = os.getenv('AUTHORIZE_URL')
+ACCESS_TOKEN_URL = os.getenv('ACCESS_TOKEN_URL')
+API_HOST = os.getenv('API_HOST')
 
-# TODO Get/set this another way
-REDIRECT_URI = 'http://localhost:5000/in'
-# REDIRECT_URI = 'https://teak-catwalk-286222.wl.r.appspot.com/in'
+# TODO To-be-removed
+REDIRECT_URI = os.getenv('REDIRECT_URI')
 
 load_dotenv()
 
