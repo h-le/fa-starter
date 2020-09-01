@@ -91,7 +91,8 @@ def oauth_flow():
         'scope': 'me',
         'response_type': 'code',
         'redirect_uri': redirect_uri,
-        'state': state}
+        'state': state,
+    }
 
     authorize_url = genius.get_authorize_url(**params)
 
@@ -112,7 +113,8 @@ def auth_redirect():
         data={
             'code': flask.request.args.get('code'),
             'redirect_uri': REDIRECT_URI,
-            'grant_type': 'authorization_code'},
+            'grant_type': 'authorization_code',
+        },
         decoder=oauth_decode)
 
     response = session.get(
