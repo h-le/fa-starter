@@ -80,7 +80,8 @@ def oauth_flow():
         name='genius',
         authorize_url=AUTHORIZE_URL,
         access_token_url=ACCESS_TOKEN_URL,
-        base_url=BASE_URL)
+        base_url=API_HOST,
+    )
 
     redirect_uri = REDIRECT_URI
 
@@ -107,7 +108,8 @@ def auth_redirect():
         name='genius',
         authorize_url=AUTHORIZE_URL,
         access_token_url=ACCESS_TOKEN_URL,
-        base_url=BASE_URL)
+        base_url=API_HOST,
+    )
 
     session = genius.get_auth_session(
         data={
