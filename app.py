@@ -122,40 +122,25 @@ def auth_redirect():
     response = session.get(
         'songs/{id}'.format(id=1929408))
 
-    lyrics = response.json()['response']['song']['embed_content']
+    if response.status_code != 200:
+        flask.abort(502, 'Invalid response from Genius API')
 
-    audio_snippet = response.json()['response']['song'] \
-    ['apple_music_player_url']
+    song = response.json()['response']['song']
+
+    # TODO Will replace with checking for `field` in flask.request.json
+    if 'embed_content' not in song:
+        flask.abort(400, 'Song must contain `embed_content`')
+
+    # TODO Will _get_ `field` value like flask.request.get(<field>)
+    lyrics = song['embed_content']
+
+    if 'apple_music_player_url' not in song:
+        flask.abort(400, 'Song must contain `apple_music_player_url`')
+
+    audio_snippet = song['apple_music_player_url']
 
     return flask.render_template(
         'song.html',
         lyrics=lyrics,
-        audio_snippet=audio_snippet)
-
-    """
-    songs = []
-    page_num = 0
-
-    while True:
-        response = session.get(
-            'search',
-            params={
-                'q': 'beach house',
-                'page': page_num})
-
-        page_hits = response.json()['response']['hits']
-
-        if not page_hits:
-            break
-
-        for hit in page_hits:
-            if hit['type'] == 'song':
-                if hit['result']['primary_artist']['name'].strip().lower() == \
-                'beach house':
-                    full_title = hit['result']['full_title']
-                    songs.append(full_title)
-
-        page_num = page_num + 1
-
-    return flask.render_template('songs.html', songs=songs)
-    """
+        audio_snippet=audio_snippet,
+    )
