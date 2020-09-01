@@ -4,7 +4,7 @@ import {ExampleComponent} from './example/example.component';
 
 const routes: Routes = [
   {path: 'example/', component: ExampleComponent},
-  // {path: '**', redirectTo: 'example/'},
+  {path: '**', redirectTo: 'example/'},
 ];
 
 @NgModule({
