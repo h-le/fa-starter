@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Starter App</title>
+    <title>Home</title>
     <style>
       .inline {
         display: inline;
@@ -24,7 +24,7 @@
   </head>
   <body>
     <h3 style="text-align: center;">
-      {{song.title}} by {{song.primary_artist.name}}
+      {{song.title}} by {{song.artist}}
       <form method="post" action="/like" class="inline">
         <input type="hidden" name="song" value="{{song}}" />
         <button type="submit" class="link-button">
