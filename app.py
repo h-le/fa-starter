@@ -21,8 +21,6 @@ API_HOST = os.getenv('API_HOST')
 # TODO To-be-removed
 REDIRECT_URI = os.getenv('REDIRECT_URI')
 
-# load_dotenv()
-
 # Set up the static folder to serve our angular client resources (*.js, *.css)
 app = flask.Flask(__name__,
                   static_folder='dist/client',
