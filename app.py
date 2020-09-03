@@ -1,4 +1,4 @@
-"""Angular+Flask AppEnginer Starter App"""
+"""Angular+Flask AppEngine Starter App"""
 import os
 
 import flask
@@ -13,6 +13,7 @@ load_dotenv()
 app = flask.Flask(__name__,
                   static_folder='dist/client',
                   static_url_path='/client/')
+
 app.register_blueprint(example.blueprint)
 
 # If we're running in debug, defer to the typescript development server
@@ -31,7 +32,6 @@ else:
 
 # Set the secret key to enable access to session data.
 app.secret_key = os.urandom(24)
-
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
