@@ -43,6 +43,7 @@ testem.log
 
 # System Files
 .DS_Store
+**/__pycache__/
 Thumbs.db
 .env
 /venv
