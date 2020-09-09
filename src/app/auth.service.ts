@@ -18,8 +18,13 @@ export class AuthService {
 
   readonly headers = new HttpHeaders({'Content-Type': 'application/json'});
 
+  http_recommend(idToken: string): Observable<any> {
+    return this.http.get<any>(environment.url + '_recommend', {
+      headers: this.headers.append('Authorization', 'Bearer ' + idToken),
+    });
+  }
+
   get_recommendation(): Promise<any> {
-    const url = environment.url;
     const user = auth().currentUser;
 
     if (user == null) {
@@ -29,11 +34,7 @@ export class AuthService {
     return user
       .getIdToken(true)
       .then(idToken => {
-        return this.http
-          .get<any>(url + '_recommend', {
-            headers: this.headers.append('Authorization', 'Bearer ' + idToken),
-          })
-          .toPromise();
+        return this.http_recommend(idToken).toPromise();
       })
       .catch(error => {
         console.log(error);

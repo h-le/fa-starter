@@ -1,4 +1,4 @@
-import {TestBed} from '@angular/core/testing';
+import {TestBed, inject} from '@angular/core/testing';
 import {AuthService} from './auth.service';
 import {
   HttpClientTestingModule,
@@ -29,6 +29,33 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
+  it('should make HTTP request for song recommendation', inject(
+    [HttpTestingController, AuthService],
+    (httpMock: HttpTestingController, authService: AuthService) => {
+      const idToken = 'idToken';
+
+      const song = {
+        album: 'album',
+        apple_music_player_url: 'apple_music_player_url',
+        artist: 'artist',
+        embed_content: 'embed_content',
+        id: 0,
+        song_art_image_url: 'song_art_image_url',
+        title: 'title',
+        url: 'url',
+      };
+
+      authService.http_recommend(idToken).subscribe(result => {
+        expect(result.song).toEqual(song);
+      });
+
+      const req = httpMock.expectOne(environment.url + '_recommend');
+      expect(req.request.method).toEqual('GET');
+
+      req.flush({song: song});
+    }
+  ));
+
   it('should not be signed-in initially', () => {
     const user = auth().currentUser;
     expect(user).toBeNull();
@@ -36,6 +63,7 @@ describe('AuthService', () => {
 
   it('should reject recommendation if no user signed in', done => {
     const message = 'Error: No user logged in!';
+
     const mock = {
       authService: jasmine.createSpyObj('authService', {
         get_recommendation: Promise.reject({
@@ -95,4 +123,11 @@ describe('AuthService', () => {
     const user = auth().currentUser;
     expect(user).toBeNull();
   });
+
+  afterEach(inject(
+    [HttpTestingController],
+    (httpMock: HttpTestingController) => {
+      httpMock.verify();
+    }
+  ));
 });
