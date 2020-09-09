@@ -1,12 +1,14 @@
 """Angular+Flask AppEngine Starter App"""
 import os
-
 import flask
 import flask_cors
+import firebase_admin
+from firebase_admin import auth
 from dotenv import load_dotenv
 
 import example
 
+app = firebase_admin.initialize_app()
 load_dotenv()
 
 # Set up the static folder to serve our angular client resources (*.js, *.css)
@@ -49,3 +51,18 @@ def serve_angular(path):
         ])
         return flask.redirect(target)
     return flask.send_file('dist/client/index.html')
+
+@app.route('/_recommend')
+def get_recommendation():
+    # TODO Method docstring
+    """ tbd """
+    id_token = flask.request.headers['Authorization'].split(' ').pop()
+
+    try:
+        user = auth.verify_id_token(id_token)
+    except firebase_admin._auth_utils.InvalidIdTokenError: # pylint: disable=protected-access
+        return flask.abort(401, 'Unauthorized')
+
+    # TODO User authentication will be necessary for better song recommendation
+
+    return flask.jsonify(user)

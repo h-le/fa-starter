@@ -1,5 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import {Router} from '@angular/router';
+import {environment} from '../environments/environment';
 import {AngularFireAuth} from '@angular/fire/auth';
 import {auth} from 'firebase/app';
 import 'firebase/auth';
@@ -8,36 +11,48 @@ import 'firebase/auth';
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(public auth: AngularFireAuth) {}
+  constructor(
+    public auth: AngularFireAuth,
+    private readonly http: HttpClient
+  ) {}
 
-  firebaseGoogleAuth(): Promise<void> {
-    return this.auth
-      .signInWithPopup(new auth.GoogleAuthProvider())
-      .then(user => {
-        console.log('User authenticated!', user);
+  readonly headers = new HttpHeaders({'Content-Type': 'application/json'});
 
-        var idToken = (user.credential as firebase.auth.OAuthCredential)
-          .accessToken;
+  get_recommendation(): Promise<any> {
+    const url = environment.url;
+    const user = auth().currentUser;
 
-        console.log("Authenticated user's idToken: ", idToken);
+    if (user == null) {
+      throw new Error('No user logged in!');
+    }
 
-        /* TODO Send to backend to be verified to create new user */
+    return user
+      .getIdToken(true)
+      .then(idToken => {
+        return this.http
+          .get<any>(url + '_recommend', {
+            headers: this.headers.append('Authorization', 'Bearer ' + idToken),
+          })
+          .toPromise();
       })
       .catch(error => {
         console.log(error);
       });
   }
 
+  firebaseGoogleAuth(): Promise<void> {
+    return this.auth
+      .signInWithPopup(new auth.GoogleAuthProvider())
+      .then(() => {})
+      .catch(error => {
+        console.log(error);
+      });
+  }
+
   firebaseSignOut() {
-    if (auth().currentUser) {
-      auth()
-        .signOut()
-        .then(() => {
-          console.log('firebaseSignOut(): User logged out!');
-        })
-        .catch(error => {
-          console.log('ERROR: firebaseSignOut(): ', error);
-        });
+    const user = auth().currentUser;
+    if (user) {
+      auth().signOut();
     }
   }
 }
