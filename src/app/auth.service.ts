@@ -18,6 +18,7 @@ export class AuthService {
 
   readonly headers = new HttpHeaders({'Content-Type': 'application/json'});
 
+  /* TODO Consider creating separate service or renaming current sevice */
   http_recommend(idToken: string): Observable<any> {
     return this.http.get<any>(environment.url + '_recommend', {
       headers: this.headers.append('Authorization', 'Bearer ' + idToken),
