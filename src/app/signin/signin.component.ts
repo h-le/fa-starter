@@ -14,7 +14,10 @@ export class SignInComponent implements OnInit {
 
   signIn() {
     this.authService.firebaseGoogleAuth().then(() => {
-      /* TODO Do something after user is authenticated... route to...? */
+      this.authService.get_recommendation().then(song => {
+        /* TODO Will eventually replace this component with a _homepage_ component */
+        console.log(song);
+      });
     });
   }
 
