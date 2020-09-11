@@ -60,8 +60,8 @@ def get_recommendation():
 
     try:
         user = auth.verify_id_token(id_token)
-    except firebase_admin.auth.InvalidIdTokenError:
-        return flask.abort(401, 'Unauthorized')
+    except auth.InvalidIdTokenError:
+        return flask.abort(401, 'Unauthorized: Invalid ID token')
 
     # TODO User authentication will be necessary for better song recommendation
 
