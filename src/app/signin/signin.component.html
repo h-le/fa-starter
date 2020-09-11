@@ -1,12 +1,25 @@
 <div class="parent">
-  <form>
-    <div style="text-align: center;">
-      <button mat-button (click)="signIn()">
-        Sign In w/ Google
-      </button>
-      <button mat-button (click)="signOut()">
-        Sign Out
-      </button>
-    </div>
-  </form>
+  <div style="text-align: center;">
+    <div *ngIf="auth.user$ | async; then authenticated else guest"></div>
+    <ng-template #guest>
+      <div>
+        <button mat-button (click)="auth.googleAuth()">
+          Enter
+        </button>
+      </div>
+    </ng-template>
+    <ng-template #authenticated>
+      <div *ngIf="auth.song$ | async as song">
+        <h2>
+          Hello, {{ song.name }}!
+        </h2>
+        <img [src]="song.picture" />
+      </div>
+      <div *ngIf="auth.user$ | async as user">
+        <button mat-button (click)="auth.signOut()">
+          Exit
+        </button>
+      </div>
+    </ng-template>
+  </div>
 </div>

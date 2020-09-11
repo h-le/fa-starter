@@ -12,9 +12,9 @@ const redirectUnauthorizedToSignIn = () => redirectUnauthorizedTo(['signin']);
 const redirectLoggedInToExample = () => redirectLoggedInTo(['example']);
 
 const routes: Routes = [
-  {path: '', redirectTo: 'signin', pathMatch: 'full'},
+  {path: '', redirectTo: '/', pathMatch: 'full'},
   {
-    path: 'signin',
+    path: '',
     component: SignInComponent,
     /* TODO Set auth guards when _home_ page and routing figured out */
     /* canActivate: [AngularFireAuthGuard], */
@@ -27,7 +27,7 @@ const routes: Routes = [
     /* canActivate: [AngularFireAuthGuard], */
     /* data: {authGuardPipe: redirectUnauthorizedToSignIn}, */
   },
-  {path: '**', redirectTo: 'signin', pathMatch: 'full'},
+  {path: '**', redirectTo: '/', pathMatch: 'full'},
 ];
 
 @NgModule({

@@ -29,6 +29,18 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
+  it('should not be signed-in initially', () => {
+    const user = service.user$;
+    expect(user).toBeUndefined();
+  });
+
+  it('should not have a user signed-in upon sign-out', () => {
+    service.signOut();
+
+    const user = service.user$;
+    expect(user).toBeUndefined();
+  });
+
   it('should make HTTP request for song recommendation', inject(
     [HttpTestingController, AuthService],
     (httpMock: HttpTestingController, authService: AuthService) => {
@@ -56,23 +68,18 @@ describe('AuthService', () => {
     }
   ));
 
-  it('should not be signed-in initially', () => {
-    const user = auth().currentUser;
-    expect(user).toBeNull();
-  });
-
-  it('should reject recommendation if no user signed in', done => {
+  it('should reject recommendation if no user logged in', done => {
     const message = 'Error: No user logged in!';
 
     const mock = {
       authService: jasmine.createSpyObj('authService', {
-        get_recommendation: Promise.reject({
+        googleAuth: Promise.reject({
           message: message,
         }),
       }),
     };
 
-    mock.authService.get_recommendation().catch((error: {message: string}) => {
+    mock.authService.googleAuth().catch((error: {message: string}) => {
       expect(error.message).toEqual(message);
       done();
     });
@@ -92,13 +99,13 @@ describe('AuthService', () => {
 
     const mock = {
       authService: jasmine.createSpyObj('authService', {
-        get_recommendation: Promise.resolve({
+        googleAuth: Promise.resolve({
           song: song,
         }),
       }),
     };
 
-    mock.authService.get_recommendation().then(result => {
+    mock.authService.googleAuth().then(result => {
       expect(result['song']).toEqual(song);
       done();
     });
@@ -107,21 +114,14 @@ describe('AuthService', () => {
   it('should sign-in user', done => {
     const mock = {
       authService: jasmine.createSpyObj('authService', {
-        firebaseGoogleAuth: Promise.resolve({}),
+        googleAuth: Promise.resolve({}),
       }),
     };
 
-    mock.authService.firebaseGoogleAuth().then(result => {
+    mock.authService.googleAuth().then(result => {
       expect(result).toEqual({});
       done();
     });
-  });
-
-  it('should not have a user signed-in upon sign-out', () => {
-    service.firebaseSignOut();
-
-    const user = auth().currentUser;
-    expect(user).toBeNull();
   });
 
   afterEach(inject(
