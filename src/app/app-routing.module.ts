@@ -8,8 +8,13 @@ import {
 import {ExampleComponent} from './example/example.component';
 import {SignInComponent} from './signin/signin.component';
 
-const redirectUnauthorizedToSignIn = () => redirectUnauthorizedTo(['signin']);
-const redirectLoggedInToExample = () => redirectLoggedInTo(['example']);
+function redirectUnauthorizedToSignIn() {
+  return redirectUnauthorizedTo(['/']);
+}
+
+function redirectLoggedInToExample() {
+  return redirectLoggedInTo(['example']);
+}
 
 const routes: Routes = [
   {path: '', redirectTo: '/', pathMatch: 'full'},
