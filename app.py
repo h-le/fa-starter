@@ -1,15 +1,25 @@
 """Angular+Flask AppEngine Starter App"""
 import os
-import flask
-import flask_cors
+import json
+import random
+import requests
 import firebase_admin
 from firebase_admin import auth
+from firebase_admin import firestore
+
+import flask
+import flask_cors
 from dotenv import load_dotenv
 
 import example
 
-app = firebase_admin.initialize_app()
 load_dotenv()
+
+app = firebase_admin.initialize_app()
+db = firestore.client()
+
+# Client access token for Genius API
+GENIUS_ACCESS_TOKEN = os.getenv('GENIUS_ACCESS_TOKEN')
 
 # Set up the static folder to serve our angular client resources (*.js, *.css)
 app = flask.Flask(__name__,
@@ -54,8 +64,18 @@ def serve_angular(path):
 
 @app.route('/_recommend')
 def get_recommendation():
-    # TODO Method docstring
-    """ tbd """
+    """
+    Recommends a song via Genius API to the verified user
+    Song recommendation:
+      - album (string): Album name
+      - apple_music_player_url (string): Apple music player URL
+      - artist (string): Artist name
+      - embed_content (string): Embedded song lyrics via Genius
+      - id (integer): Genius song ID
+      - song_art_image_thumbnail_url (string): Song art thumbnail URL
+      - title (string): Song title
+      - url (string): Genius song lyrics page URL
+    """
     id_token = flask.request.headers['Authorization'].split(' ').pop()
 
     try:
@@ -63,17 +83,53 @@ def get_recommendation():
     except auth.InvalidIdTokenError:
         return flask.abort(401, 'Unauthorized: Invalid ID token')
 
-    # TODO User authentication will be necessary for better song recommendation
+    uid = user['uid']
 
-    recommendation_placeholder = {
-        "album": "Djesse, Vol. 3",
-        "apple_music_player_url": "https://genius.com/songs/5751704/apple_music_player",
-        "artist": "Jacob Collier",
-        "embed_content": "<div id='rg_embed_link_5751704' class='rg_embed_link' data-song-id='5751704'>Read <a href='https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics'>“Sleeping on My Dreams” by Jacob Collier</a> on Genius</div> <script crossorigin src='//genius.com/songs/5751704/embed.js'></script>",
-        "id": 5751704,
-        "song_art_image_url": "https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg",
-        "title": "Sleeping on My Dreams",
-        "url": "https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics"
-    }
+    headers = {
+        'Authorization': 'Bearer {token}'.format(token=GENIUS_ACCESS_TOKEN)}
 
-    return flask.jsonify(recommendation_placeholder)
+    url = 'https://api.genius.com/'
+
+    endpoint = 'songs/'
+
+    # TODO Song selections will be based on multiple factors, e.g. time of day
+    songs = [
+        1929408, # Levitation by Beach House
+        1929412, # Space Song by Beach House
+        5059926, # Time Alone with You by Jacob Collier
+        5565895, # All I Need by Jacob Collier, Mahalia & Ty Dolla $ign
+        901533,  # I'm the Man, That Will Find You by Connan Mockasin
+        2911300, # I Wanna Roll With You by Connan Mockasin
+        188792,  # Easy Easy by King Krule
+        3234164  # Logos by King Krule
+    ]
+
+    likes = db \
+            .collection(u'likes') \
+            .where(u'uid', u'==', u'{}'.format(uid)) \
+            .get()
+
+    like_ids = [like.to_dict()['id'] for like in likes]
+
+    song_id = random.choice([id for id in songs if id not in like_ids])
+
+    response = requests.get(
+        url='{url}{endpoint}{song_id}'.format(
+            url=url,
+            endpoint=endpoint,
+            song_id=str(song_id)),
+        headers=headers)
+
+    song = json.loads(response.text)['response']['song']
+
+    recommendation = {
+        'album': song['album']['name'],
+        'apple_music_player_url': song['apple_music_player_url'],
+        'artist': song['primary_artist']['name'],
+        'embed_content': song['embed_content'],
+        'id': song['id'],
+        'song_art_image_thumbnail_url': song['song_art_image_thumbnail_url'],
+        'title': song['title'],
+        'url': song['url']}
+
+    return flask.jsonify(recommendation)
