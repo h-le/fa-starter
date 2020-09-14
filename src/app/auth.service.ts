@@ -1,13 +1,14 @@
 import {Injectable} from '@angular/core';
-import {Router} from '@angular/router';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
-import {Observable, of} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {Observable, from} from 'rxjs';
+import {flatMap} from 'rxjs/operators';
 
+import 'firebase/auth';
 import {auth} from 'firebase/app';
 import {AngularFireAuth} from '@angular/fire/auth';
 
+import {Recommendation} from './models/recommendation.model';
 import {environment} from '../environments/environment';
 
 @Injectable({
@@ -16,43 +17,31 @@ import {environment} from '../environments/environment';
 export class AuthService {
   readonly headers = new HttpHeaders({'Content-Type': 'application/json'});
 
-  /*
-     TODO Create model for song$, and return type for http_recommend:
-     this.http.get<song$ model>...
-  */
-  user$: Observable<any>;
-  song$: Observable<any>;
+  constructor(private http: HttpClient, private auth: AngularFireAuth) {}
 
-  constructor(
-    private router: Router,
-    private http: HttpClient,
-    private auth: AngularFireAuth
-  ) {
-    this.auth.onAuthStateChanged(user => {
-      this.user$ = of(user ? user : null);
-    });
-  }
-
-  http_recommend(idToken) {
+  /** Returns an Observable for a song recommendation to the signed-in user. */
+  getRecommendation(idToken): Observable<Recommendation> {
     return this.http.get<any>(environment.url + '_recommend', {
       headers: this.headers.append('Authorization', 'Bearer ' + idToken),
     });
   }
 
-  async googleAuth() {
-    return await this.auth
-      .signInWithPopup(new auth.GoogleAuthProvider())
-      .then(() => {
+  /** Authenticates a user and returns an Observable for their ID token. */
+  authenticateWithGoogle(): Observable<string> {
+    const authPromise = this.auth.signInWithPopup(
+      new auth.GoogleAuthProvider()
+    );
+    return from(authPromise).pipe(
+      flatMap(() => {
         const user = auth().currentUser;
-        if (user == null) throw new Error('No user logged in');
-
-        return user.getIdToken(true).then(idToken => {
-          this.song$ = this.http_recommend(idToken);
-        });
-      });
+        if (user == null) throw new Error('No user found after signed in.');
+        return user.getIdToken(true);
+      })
+    );
   }
 
-  async signOut() {
-    await this.auth.signOut();
+  /** Sign the user out. */
+  signOut() {
+    this.auth.signOut().then(() => window.location.reload());
   }
 }
