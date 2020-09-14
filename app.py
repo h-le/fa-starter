@@ -65,4 +65,15 @@ def get_recommendation():
 
     # TODO User authentication will be necessary for better song recommendation
 
-    return flask.jsonify(user)
+    recommendation_placeholder = {
+        "album": "Djesse, Vol. 3",
+        "apple_music_player_url": "https://genius.com/songs/5751704/apple_music_player",
+        "artist": "Jacob Collier",
+        "embed_content": "<div id='rg_embed_link_5751704' class='rg_embed_link' data-song-id='5751704'>Read <a href='https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics'>“Sleeping on My Dreams” by Jacob Collier</a> on Genius</div> <script crossorigin src='//genius.com/songs/5751704/embed.js'></script>",
+        "id": 5751704,
+        "song_art_image_url": "https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg",
+        "title": "Sleeping on My Dreams",
+        "url": "https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics"
+    }
+
+    return flask.jsonify(recommendation_placeholder)
