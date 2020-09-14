@@ -21,7 +21,7 @@ export class AuthService {
 
   /** Returns an Observable for a song recommendation to the signed-in user. */
   getRecommendation(idToken): Observable<Recommendation> {
-    return this.http.get<any>(environment.url + '_recommend', {
+    return this.http.get<Recommendation>(environment.url + '_recommend', {
       headers: this.headers.append('Authorization', 'Bearer ' + idToken),
     });
   }
