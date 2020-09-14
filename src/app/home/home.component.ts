@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 
 import {Observable} from 'rxjs';
 import {flatMap} from 'rxjs/operators';
@@ -12,7 +12,7 @@ import {AuthService} from '../auth.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
   recommendation$: Observable<Recommendation>;
 
   constructor(public authService: AuthService) {
@@ -22,6 +22,4 @@ export class HomeComponent implements OnInit {
       })
     );
   }
-
-  ngOnInit(): void {}
 }
