@@ -57,6 +57,49 @@ describe('AuthService', () => {
     }
   ));
 
+  it('should sign-in a user and return a credential', done => {
+    const cred = {
+      credential: {
+        idToken: 'idT0ken',
+      },
+      user: {
+        email: 'user@gmail.com',
+      },
+    };
+
+    const mockAngularFireAuth = {
+      auth: jasmine.createSpyObj('auth', {
+        signInWithPopup: Promise.resolve({
+          cred: cred,
+        }),
+      }),
+    };
+
+    mockAngularFireAuth.auth.signInWithPopup().then(data => {
+      expect(data.cred).toEqual(cred);
+      done();
+    });
+  });
+
+  it('should reject accounts existing with different credentials', done => {
+    const code: string = 'auth/account-exists-with-different-credential';
+
+    const mockAngularFireAuth = {
+      auth: jasmine.createSpyObj('auth', {
+        signInWithPopup: Promise.reject({
+          code: code,
+        }),
+      }),
+    };
+
+    mockAngularFireAuth.auth
+      .signInWithPopup()
+      .catch((error: {code: string}) => {
+        expect(error.code).toEqual(code);
+        done();
+      });
+  });
+
   it('should not have a signed-in user initially', () => {
     const user = auth().currentUser;
     expect(user).toBeNull();
