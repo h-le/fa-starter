@@ -46,8 +46,8 @@ describe('AuthService', () => {
         url: 'url',
       };
 
-      authService.getRecommendation(idToken).subscribe(recommendation => {
-        expect(recommendation).toEqual(recommendation);
+      authService.getRecommendation(idToken).subscribe(response => {
+        expect(response['recommendation']).toEqual(recommendation);
       });
 
       const req = httpMock.expectOne(environment.url + '_recommend');
