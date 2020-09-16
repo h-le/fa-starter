@@ -59,7 +59,7 @@ describe('HomeComponent', () => {
     );
 
     getRecommendationSpy = authService.getRecommendation.and.returnValue(
-      of({recommendation: recommendation})
+      of(recommendation)
     );
 
     TestBed.configureTestingModule({
@@ -91,7 +91,12 @@ describe('HomeComponent', () => {
 
   it('should return a song recommendation', async(() => {
     component.recommendation$.subscribe(response => {
-      expect(response['recommendation']).toEqual(recommendation);
+      expect(response).toEqual(recommendation);
     });
+  }));
+
+  it('should display the song recommendation', async(() => {
+    const song = fixture.debugElement.queryAll(By.css('.mat-card'));
+    expect(song).not.toEqual([]);
   }));
 });
