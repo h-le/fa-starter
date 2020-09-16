@@ -35,14 +35,17 @@ describe('HomeComponent', () => {
 
   const idToken: string = 'idT0ken';
   const recommendation: Recommendation = {
-    album: 'album',
-    apple_music_player_url: 'apple_music_player_url',
-    artist: 'artist',
-    embed_content: 'embed_content',
-    id: 0,
-    song_art_image_url: 'song_art_image_url',
-    title: 'title',
-    url: 'url',
+    album: 'Djesse, Vol. 3',
+    apple_music_player_url:
+      'https://genius.com/songs/5751704/apple_music_player',
+    artist: 'Jacob Collier',
+    embed_content:
+      "<div id='rg_embed_link_5751704' class='rg_embed_link' data-song-id='5751704'>Read <a href='https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics'>“Sleeping on My Dreams” by Jacob Collier</a> on Genius</div> <script crossorigin src='//genius.com/songs/5751704/embed.js'></script>",
+    id: 5751704,
+    song_art_image_url:
+      'https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg',
+    title: 'Sleeping on My Dreams',
+    url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
   };
 
   beforeEach(async(() => {
@@ -56,7 +59,7 @@ describe('HomeComponent', () => {
     );
 
     getRecommendationSpy = authService.getRecommendation.and.returnValue(
-      of({recommendation: recommendation})
+      of(recommendation)
     );
 
     TestBed.configureTestingModule({
@@ -88,7 +91,12 @@ describe('HomeComponent', () => {
 
   it('should return a song recommendation', async(() => {
     component.recommendation$.subscribe(response => {
-      expect(response['recommendation']).toEqual(recommendation);
+      expect(response).toEqual(recommendation);
     });
+  }));
+
+  it('should display the song recommendation', async(() => {
+    const song = fixture.debugElement.queryAll(By.css('.mat-card'));
+    expect(song).not.toEqual([]);
   }));
 });

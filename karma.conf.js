@@ -4,9 +4,6 @@
 module.exports = function (config) {
   config.set({
     basePath: '',
-    proxies: {
-      '/undefined': '',
-    },
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
     plugins: [
       require('karma-jasmine'),
