@@ -126,6 +126,7 @@ def get_recommendation():
         'id': song['id'],
         'song_art_image_thumbnail_url': song['song_art_image_thumbnail_url'],
         'title': song['title'],
-        'url': song['url']}
+        'url': song['url'],
+    }
 
     return flask.jsonify(recommendation)
