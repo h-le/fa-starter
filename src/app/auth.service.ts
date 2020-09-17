@@ -41,7 +41,7 @@ export class AuthService {
   }
 
   /** Sign the user out. */
-  signOut() {
-    this.auth.signOut().then(() => window.location.reload());
+  signOut(): Promise<unknown> {
+    return this.auth.signOut().then(() => window.location.reload());
   }
 }
