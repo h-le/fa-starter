@@ -17,7 +17,11 @@ import {environment} from '../environments/environment';
 export class AuthService {
   readonly headers = new HttpHeaders({'Content-Type': 'application/json'});
 
-  constructor(private http: HttpClient, private auth: AngularFireAuth) {}
+  constructor(
+    private http: HttpClient,
+    private auth: AngularFireAuth,
+    private window: Window
+  ) {}
 
   /** Returns an Observable for a song recommendation to the signed-in user. */
   getRecommendation(idToken): Observable<Recommendation> {
@@ -33,15 +37,16 @@ export class AuthService {
     );
     return from(authPromise).pipe(
       flatMap(() => {
-        const user = auth().currentUser;
-        if (user == null) throw new Error('No user found after signed in.');
-        return user.getIdToken(true);
+        return this.auth.currentUser.then(user => {
+          if (user == null) throw new Error('No user found after signed in.');
+          return user.getIdToken(true);
+        });
       })
     );
   }
 
   /** Sign the user out. */
   signOut(): Promise<unknown> {
-    return this.auth.signOut().then(() => window.location.reload());
+    return this.auth.signOut().then(() => this.window.location.reload());
   }
 }
