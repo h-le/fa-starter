@@ -21,12 +21,21 @@ describe('AuthService', () => {
     credential: {},
   };
 
-  /* TODO Add currentUser and currentUser.getIdToken */
+  const idToken = 'idT0ken';
+
+  /* TODO Most iffy about currentUser */
   const mockAngularFireAuth = jasmine.createSpyObj('AngularFireAuth', {
     signInWithPopup: Promise.resolve(() => {
       return credential;
     }),
     signOut: Promise.resolve(() => {}),
+    currentUser: Promise.resolve(user => {
+      return jasmine.createSpyObj('user', {
+        getIdToken: Promise.resolve(() => {
+          return idToken;
+        }),
+      });
+    }),
   });
 
   const mockWindow = {
@@ -58,11 +67,15 @@ describe('AuthService', () => {
        [ ] ?. Check that getIdToken isn't on currentUser (because null)
        [x] 1. Authenticate user via service.authenticateWithGoogle()
        [x] 2. Check that user was prompted with Google auth
-       [ ] 3. Check that currentUser is not null
-       [ ] 4. Check that currentUser.getIdToken was called
+       [ ] 3. Check that currentUser doesn't resolve to a null value
+       [x] 4. Check that currentUser.getIdToken was called
        [ ] 5. Check that currentUser.getIdToken is not null
     */
-    service.authenticateWithGoogle();
+    service.authenticateWithGoogle().subscribe(() => {
+      expect(mockAngularFireAuth.currentUser.getIdToken).toHaveBeenCalledWith(
+        true
+      );
+    });
     expect(mockAngularFireAuth.signInWithPopup).toHaveBeenCalledWith(
       new auth.GoogleAuthProvider()
     );
