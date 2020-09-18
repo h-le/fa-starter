@@ -7,6 +7,7 @@ import {
 } from '@angular/common/http/testing';
 
 import {AngularFireModule} from '@angular/fire';
+import {AngularFireAuth} from '@angular/fire/auth';
 import {auth} from 'firebase/app';
 
 import {Recommendation} from './models/recommendation.model';
@@ -15,13 +16,35 @@ import {environment} from '../environments/environment';
 describe('AuthService', () => {
   let service: AuthService;
 
+  const credential = {
+    user: {},
+    credential: {},
+  };
+
+  const idToken = 'idT0ken';
+
+  const mockAngularFireAuth = jasmine.createSpyObj('AngularFireAuth', {
+    signInWithPopup: Promise.resolve(() => {
+      return credential;
+    }),
+    signOut: Promise.resolve(() => {}),
+  });
+
+  const mockWindow = {
+    location: jasmine.createSpyObj('location', ['reload']),
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         HttpClientTestingModule,
         AngularFireModule.initializeApp(environment.firebaseConfig),
       ],
-      providers: [AuthService],
+      providers: [
+        AuthService,
+        {provide: Window, useValue: mockWindow},
+        {provide: AngularFireAuth, useValue: mockAngularFireAuth},
+      ],
     });
     service = TestBed.inject(AuthService);
   });
@@ -30,20 +53,37 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
+  it(`should authenticate user with Google pop-up and return user's ID token`, () => {
+    service.authenticateWithGoogle();
+    expect(mockAngularFireAuth.signInWithPopup).toHaveBeenCalledWith(
+      new auth.GoogleAuthProvider()
+    );
+  });
+
+  it('should sign the user out', () => {
+    service.signOut().subscribe(() => {
+      expect(mockWindow.location.reload).toHaveBeenCalled();
+    });
+    expect(mockAngularFireAuth.signOut).toHaveBeenCalled();
+  });
+
   it('should make HTTP request for song recommendation', inject(
     [HttpTestingController, AuthService],
     (httpMock: HttpTestingController, authService: AuthService) => {
       const idToken = 'idToken';
 
-      const recommendation: Recommendation = {
-        album: 'album',
-        apple_music_player_url: 'apple_music_player_url',
-        artist: 'artist',
-        embed_content: 'embed_content',
-        id: 0,
-        song_art_image_url: 'song_art_image_url',
-        title: 'title',
-        url: 'url',
+      const recommendation = {
+        album: 'Djesse, Vol. 3',
+        apple_music_player_url:
+          'https://genius.com/songs/5751704/apple_music_player',
+        artist: 'Jacob Collier',
+        embed_content:
+          "<div id='rg_embed_link_5751704' class='rg_embed_link' data-song-id='5751704'>Read <a href='https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics'>“Sleeping on My Dreams” by Jacob Collier</a> on Genius</div> <script crossorigin src='//genius.com/songs/5751704/embed.js'></script>",
+        id: 5751704,
+        song_art_image_url:
+          'https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg',
+        title: 'Sleeping on My Dreams',
+        url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
       };
 
       authService.getRecommendation(idToken).subscribe(response => {
@@ -56,60 +96,6 @@ describe('AuthService', () => {
       req.flush({recommendation: recommendation});
     }
   ));
-
-  it('should sign-in a user and return a credential', done => {
-    const cred = {
-      credential: {
-        idToken: 'idT0ken',
-      },
-      user: {
-        email: 'user@gmail.com',
-      },
-    };
-
-    const mockAngularFireAuth = {
-      auth: jasmine.createSpyObj('auth', {
-        signInWithPopup: Promise.resolve({
-          cred: cred,
-        }),
-      }),
-    };
-
-    mockAngularFireAuth.auth.signInWithPopup().then(data => {
-      expect(data.cred).toEqual(cred);
-      done();
-    });
-  });
-
-  it('should reject accounts existing with different credentials', done => {
-    const code: string = 'auth/account-exists-with-different-credential';
-
-    const mockAngularFireAuth = {
-      auth: jasmine.createSpyObj('auth', {
-        signInWithPopup: Promise.reject({
-          code: code,
-        }),
-      }),
-    };
-
-    mockAngularFireAuth.auth
-      .signInWithPopup()
-      .catch((error: {code: string}) => {
-        expect(error.code).toEqual(code);
-        done();
-      });
-  });
-
-  it('should not have a signed-in user initially', () => {
-    const user = auth().currentUser;
-    expect(user).toBeNull();
-  });
-
-  it('should sign the user out', () => {
-    service.signOut();
-    const user = auth().currentUser;
-    expect(user).toBeNull();
-  });
 
   afterEach(inject(
     [HttpTestingController],

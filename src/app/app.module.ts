@@ -31,6 +31,7 @@ import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
   ],
   providers: [
     AuthService,
+    {provide: Window, useValue: window},
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: {appearance: 'fill'},
