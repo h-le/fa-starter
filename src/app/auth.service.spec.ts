@@ -23,19 +23,11 @@ describe('AuthService', () => {
 
   const idToken = 'idT0ken';
 
-  /* TODO Most iffy about currentUser */
   const mockAngularFireAuth = jasmine.createSpyObj('AngularFireAuth', {
     signInWithPopup: Promise.resolve(() => {
       return credential;
     }),
     signOut: Promise.resolve(() => {}),
-    currentUser: Promise.resolve(user => {
-      return jasmine.createSpyObj('user', {
-        getIdToken: Promise.resolve(() => {
-          return idToken;
-        }),
-      });
-    }),
   });
 
   const mockWindow = {
@@ -62,34 +54,14 @@ describe('AuthService', () => {
   });
 
   it(`should authenticate user with Google pop-up and return user's ID token`, () => {
-    /* TODO
-       [ ] ?. Check that user isn't signed in, i.e. currentUser is null
-       [ ] ?. Check that getIdToken isn't on currentUser (because null)
-       [x] 1. Authenticate user via service.authenticateWithGoogle()
-       [x] 2. Check that user was prompted with Google auth
-       [ ] 3. Check that currentUser doesn't resolve to a null value
-       [x] 4. Check that currentUser.getIdToken was called
-       [ ] 5. Check that currentUser.getIdToken is not null
-    */
-    service.authenticateWithGoogle().subscribe(() => {
-      expect(mockAngularFireAuth.currentUser.getIdToken).toHaveBeenCalledWith(
-        true
-      );
-    });
+    service.authenticateWithGoogle();
     expect(mockAngularFireAuth.signInWithPopup).toHaveBeenCalledWith(
       new auth.GoogleAuthProvider()
     );
   });
 
   it('should sign the user out', () => {
-    /* TODO
-       [ ] 1. Sign user, i.e. expect currentUser is not null
-       [x] 2. Sign user out
-       [x] 3. Check signOut has been called
-       [x] 4. Check that window has been reloaded (called)
-       [ ] 5. Check that user was signed out, i.e. expect currentUser is null
-    */
-    service.signOut().then(() => {
+    service.signOut().subscribe(() => {
       expect(mockWindow.location.reload).toHaveBeenCalled();
     });
     expect(mockAngularFireAuth.signOut).toHaveBeenCalled();
@@ -100,15 +72,18 @@ describe('AuthService', () => {
     (httpMock: HttpTestingController, authService: AuthService) => {
       const idToken = 'idToken';
 
-      const recommendation: Recommendation = {
-        album: 'album',
-        apple_music_player_url: 'apple_music_player_url',
-        artist: 'artist',
-        embed_content: 'embed_content',
-        id: 0,
-        song_art_image_url: 'song_art_image_url',
-        title: 'title',
-        url: 'url',
+      const recommendation = {
+        album: 'Djesse, Vol. 3',
+        apple_music_player_url:
+          'https://genius.com/songs/5751704/apple_music_player',
+        artist: 'Jacob Collier',
+        embed_content:
+          "<div id='rg_embed_link_5751704' class='rg_embed_link' data-song-id='5751704'>Read <a href='https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics'>“Sleeping on My Dreams” by Jacob Collier</a> on Genius</div> <script crossorigin src='//genius.com/songs/5751704/embed.js'></script>",
+        id: 5751704,
+        song_art_image_url:
+          'https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg',
+        title: 'Sleeping on My Dreams',
+        url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
       };
 
       authService.getRecommendation(idToken).subscribe(response => {
