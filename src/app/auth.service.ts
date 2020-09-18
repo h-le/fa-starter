@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 import {Observable, from} from 'rxjs';
-import {flatMap} from 'rxjs/operators';
+import {flatMap, map} from 'rxjs/operators';
 
 import 'firebase/auth';
 import {auth} from 'firebase/app';
@@ -23,11 +23,26 @@ export class AuthService {
     private window: Window
   ) {}
 
+  /* TODO Simple validation/processing for now */
+  /** Processes song recommendation. */
+  validateRecommendation(song): Recommendation {
+    if (song.album == null) {
+      song.album = 'Non-Album Single';
+    }
+    return song;
+  }
+
   /** Returns an Observable for a song recommendation to the signed-in user. */
   getRecommendation(idToken): Observable<Recommendation> {
-    return this.http.get<Recommendation>(environment.url + '_recommend', {
-      headers: this.headers.append('Authorization', 'Bearer ' + idToken),
-    });
+    return this.http
+      .get<Recommendation>(environment.url + '_recommend', {
+        headers: this.headers.append('Authorization', 'Bearer ' + idToken),
+      })
+      .pipe(
+        map((song: Recommendation) => {
+          return this.validateRecommendation(song);
+        })
+      );
   }
 
   /** Authenticates a user and returns an Observable for their ID token. */
