@@ -46,7 +46,7 @@ export class AuthService {
   }
 
   /** Sign the user out. */
-  signOut(): Promise<unknown> {
-    return this.auth.signOut().then(() => this.window.location.reload());
+  signOut(): Observable<void> {
+    return from(this.auth.signOut().then(() => this.window.location.reload()));
   }
 }
