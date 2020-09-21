@@ -9,19 +9,6 @@ class TestFirebase(absltest.TestCase):
     """Firebase Testing Class"""
     decoded_jwt = {
         'uid': 'f00',
-        # ...
-    }
-
-    songs = {
-        1929408, # Levitation by Beach House
-        1929412, # Space Song by Beach House
-        5059926, # Time Alone with You by Jacob Collier
-        5565895, # All I Need by Jacob Collier, Mahalia & Ty Dolla $ign
-        901533,  # I'm the Man, That Will Find You by Connan Mockasin
-        2911300, # I Wanna Roll With You by Connan Mockasin
-        188792,  # Easy Easy by King Krule
-        3234164, # Logos by King Krule
-        2979924, # Lauren by Men I Trust
     }
 
     @classmethod
