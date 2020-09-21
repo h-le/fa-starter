@@ -11,6 +11,7 @@ def logged_in(id_token):
     try:
         auth.verify_id_token(id_token)
     except auth.InvalidIdTokenError:
+        # TODO Include exceptions for ExpiredIdTokenError, RevokedIdTokenError, ...
         return False
     return True
 
@@ -33,7 +34,7 @@ def get_song_id(id_token):
     likes = db \
             .collection(u'likes') \
             .where(u'uid', u'==', u'{}'.format(uid)) \
-            .get()
-    like_ids = {like.to_dict()['id'] for like in likes}
+            .stream()
+    like_ids = {like_dict['id'] for like_dict in [like.to_dict() for like in likes]}
     song_id = random.choice(tuple(songs - like_ids))
     return song_id
