@@ -9,6 +9,7 @@ def get_song(song_id):
     headers = {'Authorization': 'Bearer {token}'.format(token=token)}
     url = 'https://api.genius.com/songs/{song_id}'.format(song_id=song_id)
     response = requests.get(url=url, headers=headers)
+    # TODO Handle bad request, likely due to bad/no access token, and unit-test
     song = json.loads(response.text)['response']['song']
     return {
         'album': song['album']['name'] if song['album'] else song['album'],
