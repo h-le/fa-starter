@@ -16,7 +16,7 @@ class TestFlaskApp(absltest.TestCase):
         self.api = TestApp(app)
         self.headers = {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer {}'.format('idT0ken')
+            'Authorization': 'Bearer {}'.format('idT0ken'),
         }
         self.song_id = 2979924
         self.song = {
