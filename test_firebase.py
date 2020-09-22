@@ -18,23 +18,27 @@ class TestFirebase(absltest.TestCase):
         """
         firebase.db = MockFirestore()
 
-    def test_logged_in(self):
+    @patch.object(firebase.auth, 'verify_id_token')
+    def test_logged_in(self, mock_verify_id_token):
         """Test checking if a user is logged in"""
-        with patch('utilities.firebase.auth.verify_id_token') as mocked_verify_id_token:
-            mocked_verify_id_token.return_value = self.decoded_jwt
-            logged_in = firebase.logged_in('good_idT0ken')
-            self.assertTrue(logged_in)
-            mocked_verify_id_token.side_effect = \
-                 auth.InvalidIdTokenError('InvalidIdTokenError')
-            logged_in = firebase.logged_in('bad_idT0ken')
-            self.assertFalse(logged_in)
+        mock_verify_id_token.return_value = self.decoded_jwt
+        logged_in = firebase.logged_in('good_idT0ken')
+        self.assertTrue(logged_in)
 
-    def test_get_song_id(self):
+    @patch.object(firebase.auth, 'verify_id_token')
+    def test_logged_out(self, mock_verify_id_token):
+        """Test checking if a user is _not_ logged in"""
+        mock_verify_id_token.side_effect = \
+            auth.InvalidIdTokenError('InvalidIdTokenError')
+        logged_in = firebase.logged_in('bad_idT0ken')
+        self.assertFalse(logged_in)
+
+    @patch.object(firebase.auth, 'verify_id_token')
+    def test_get_song_id(self, mock_verify_id_token):
         """Test getting song (ID) recommendation"""
-        with patch('utilities.firebase.auth.verify_id_token') as mocked_verify_id_token:
-            mocked_verify_id_token.return_value = self.decoded_jwt
-            song_id = firebase.get_song_id('idT0ken')
-            self.assertIsInstance(song_id, int)
+        mock_verify_id_token.return_value = self.decoded_jwt
+        song_id = firebase.get_song_id('idT0ken')
+        self.assertIsInstance(song_id, int)
 
 if __name__ == '__main__':
     absltest.main()
