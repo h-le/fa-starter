@@ -26,7 +26,7 @@ class TestFirebase(absltest.TestCase):
         self.assertTrue(logged_in)
 
     @patch.object(firebase.auth, 'verify_id_token')
-    def test_logged_out(self, mock_verify_id_token):
+    def test_not_logged_in(self, mock_verify_id_token):
         """Test checking if a user is _not_ logged in"""
         mock_verify_id_token.side_effect = \
             auth.InvalidIdTokenError('InvalidIdTokenError')
