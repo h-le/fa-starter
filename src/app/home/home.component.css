@@ -1,0 +1,21 @@
+:host {
+  align-items: center;
+  background: #f1f1e7;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+}
+
+::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+  stroke: #dae59b;
+}
+
+.mat-icon-button {
+  color: #dae59b;
+}
+
+.mat-card {
+  background: #717f77;
+  width: 75%;
+}
