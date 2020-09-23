@@ -3,7 +3,7 @@ import json
 from unittest.mock import patch
 from flask_webtest import TestApp
 from absl.testing import absltest # pylint: disable=no-name-in-module
-from app import app, genius, firebase
+from app import app, genius, firebase, bigquery
 
 class TestFlaskApp(absltest.TestCase):
     """Flask App Testing Class"""
@@ -34,6 +34,16 @@ class TestFlaskApp(absltest.TestCase):
             'title': 'Lauren',
             'url': 'https://genius.com/Men-i-trust-lauren-lyrics',
         }
+        self.likes = [
+            {
+                'id': 0,
+                'uid': 'f00',
+            },
+            {
+                'id': 1,
+                'uid': 'f00',
+            },
+        ]
 
     @patch.object(genius, 'get_song')
     @patch.object(firebase, 'get_song_id')
@@ -57,6 +67,18 @@ class TestFlaskApp(absltest.TestCase):
         self.assertEqual(response.headers['Content-Type'], 'text/html; charset=utf-8')
         self.assertEqual(response.status_code, 401)
         self.assertTrue('User not logged in!' in response.text)
+
+    @patch.object(bigquery, 'get_likes')
+    @patch.object(firebase, 'logged_in')
+    def test_get_likes(self, mock_logged_in, mock_get_likes):
+        """Test hitting the '_likes' endpoint to get logged in user's liked songs"""
+        mock_logged_in.return_value = True
+        mock_get_likes.return_value = self.likes
+        response = self.api.get('/_likes', headers=self.headers)
+        likes = json.loads(response.text)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(likes, self.likes)
 
 if __name__ == '__main__':
     absltest.main()
