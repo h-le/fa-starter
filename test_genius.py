@@ -1,5 +1,6 @@
 """Tests for genius.py"""
 import os
+import json
 from unittest.mock import patch
 from dotenv import load_dotenv
 from absl.testing import absltest # pylint: disable=no-name-in-module
@@ -37,20 +38,28 @@ class TestGenius(absltest.TestCase):
     def test_get_song(self, mock_get):
         """Test retrieving a song via the Genius API"""
         mock_get.return_value.status_code = 200
-        mock_get.return_value.text = (
-            r'''{"response":{"song":{"apple_music_player_url":'''
-            r'''"https://genius.com/songs/2979924/apple_music_player",'''
-            r'''"embed_content":"<div id='rg_embed_link_2979924' '''
-            r'''class='rg_embed_link' data-song-id='2979924'>Read '''
-            r'''<a href='https://genius.com/Men-i-trust-lauren-lyrics'>'''
-            r'''“Lauren” by Men I Trust</a> on Genius</div> <script '''
-            r'''crossorigin src='//genius.com/songs/2979924/embed.js'>'''
-            r'''</script>","id":2979924,"song_art_image_thumbnail_url":'''
-            r'''"https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b'''
-            r'''.300x300x1.jpg","title":"Lauren","url":"https://genius.com'''
-            r'''/Men-i-trust-lauren-lyrics","album":null,"primary_artist":'''
-            r'''{"name":"Men I Trust"}}}}'''
-        )
+        expected_response = {
+            'response': {
+                'song': {
+                    'album': None,
+                    'apple_music_player_url': 'https://genius.com/songs/2979924/apple_music_player',
+                    'primary_artist': {
+                        'name': 'Men I Trust'
+                    },
+                    'embed_content': "<div id='rg_embed_link_2979924' " \
+                        "class='rg_embed_link' data-song-id='2979924'>" \
+                        "Read <a href='https://genius.com/Men-i-trust-lauren-lyrics'>" \
+                        "“Lauren” by Men\xa0I Trust</a> on Genius</div> <script " \
+                        "crossorigin src='//genius.com/songs/2979924/embed.js'></script>",
+                    'id': 2979924,
+                    'song_art_image_thumbnail_url': \
+                        'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg',
+                    'title': 'Lauren',
+                    'url': 'https://genius.com/Men-i-trust-lauren-lyrics',
+                }
+            }
+        }
+        mock_get.return_value.text = json.dumps(expected_response)
         song = genius.get_song(self.song_id)
         mock_get.assert_called_with(url=self.url, headers=self.headers)
         self.assertEqual(song, self.song)
