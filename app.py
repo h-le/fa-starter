@@ -1,22 +1,16 @@
-"""Angular+Flask AppEngine Starter App"""
+"""Angular, Flask, & GAE Starter App"""
 import os
 import flask
 import flask_cors
-import firebase_admin
-from firebase_admin import auth
 from dotenv import load_dotenv
+from utilities import genius, firebase
 
-import example
-
-app = firebase_admin.initialize_app()
 load_dotenv()
 
 # Set up the static folder to serve our angular client resources (*.js, *.css)
 app = flask.Flask(__name__,
                   static_folder='dist/client',
                   static_url_path='/client/')
-
-app.register_blueprint(example.blueprint)
 
 # If we're running in debug, defer to the typescript development server
 # This gets us things like live reload and better sourcemaps.
@@ -54,26 +48,10 @@ def serve_angular(path):
 
 @app.route('/_recommend')
 def get_recommendation():
-    # TODO Method docstring
-    """ tbd """
+    """Recommends a song via Genius API to the verified user"""
     id_token = flask.request.headers['Authorization'].split(' ').pop()
-
-    try:
-        user = auth.verify_id_token(id_token)
-    except auth.InvalidIdTokenError:
-        return flask.abort(401, 'Unauthorized: Invalid ID token')
-
-    # TODO User authentication will be necessary for better song recommendation
-
-    recommendation_placeholder = {
-        "album": "Djesse, Vol. 3",
-        "apple_music_player_url": "https://genius.com/songs/5751704/apple_music_player",
-        "artist": "Jacob Collier",
-        "embed_content": "<div id='rg_embed_link_5751704' class='rg_embed_link' data-song-id='5751704'>Read <a href='https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics'>“Sleeping on My Dreams” by Jacob Collier</a> on Genius</div> <script crossorigin src='//genius.com/songs/5751704/embed.js'></script>",
-        "id": 5751704,
-        "song_art_image_url": "https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg",
-        "title": "Sleeping on My Dreams",
-        "url": "https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics"
-    }
-
-    return flask.jsonify(recommendation_placeholder)
+    if not firebase.logged_in(id_token):
+        return flask.abort(401, 'User not logged in!')
+    song_id = firebase.get_song_id(id_token)
+    song = genius.get_song(song_id)
+    return flask.jsonify(song)
