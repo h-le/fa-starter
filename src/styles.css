@@ -12,6 +12,15 @@ body {
   padding: 0;
 }
 
+body .mat-app-background {
+  background-color: #f1f1e7;
+  height: 100%;
+}
+
+.mat-icon-button {
+  color: #6b6a64;
+}
+
 mat-spinner {
   margin-left: auto;
   margin-right: auto;
