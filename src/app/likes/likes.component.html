@@ -1,1 +1,14 @@
-<p>likes works!</p>
+<ng-container *ngIf="likes$ | async as likes; else loading"
+  ><h3 *ngIf="likes.length == 0">No likes!</h3>
+  <mat-list *ngIf="likes.length > 0">
+    <mat-list-item *ngFor="let like of likes">
+      <h2 matLine>{{like.id}}</h2>
+    </mat-list-item>
+  </mat-list>
+</ng-container>
+<ng-template #loading>
+  <mat-progress-spinner
+    strokeWidth="5"
+    [mode]="'indeterminate'"
+  ></mat-progress-spinner>
+</ng-template>
