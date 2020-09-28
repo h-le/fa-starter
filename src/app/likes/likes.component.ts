@@ -1,15 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-likes',
   templateUrl: './likes.component.html',
-  styleUrls: ['./likes.component.css']
+  styleUrls: ['./likes.component.css'],
 })
-export class LikesComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
+export class LikesComponent {
+  constructor() {}
 }
