@@ -54,12 +54,12 @@ export class AuthService {
   /** Authenticates a user, if not signed in, and returns an Observable for their ID token. */
   authenticateWithGoogle(): Observable<string> {
     return from(this.user).pipe(
-      flatMap(user => {
-        return from(
+      flatMap(user =>
+        from(
           user ? Promise.resolve()
                : this.auth.signInWithPopup(new auth.GoogleAuthProvider())
-        );
-      }),
+        )
+      ),
       flatMap(() => from(this.auth.currentUser)),
       flatMap(user => {
         if (!user) throw new Error('No user signed in.');
