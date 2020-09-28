@@ -55,17 +55,15 @@ export class AuthService {
   authenticateWithGoogle(): Observable<string> {
     return from(this.user).pipe(
       flatMap(user => {
-        const authPromise = user
-          ? Promise.resolve()
-          : this.auth.signInWithPopup(new auth.GoogleAuthProvider());
-        return from(authPromise).pipe(
-          flatMap(() => {
-            return this.auth.currentUser.then(user => {
-              if (user == null) throw new Error('No user signed in.');
-              return user.getIdToken();
-            });
-          })
+        return from(
+          user ? Promise.resolve()
+               : this.auth.signInWithPopup(new auth.GoogleAuthProvider())
         );
+      }),
+      flatMap(() => from(this.auth.currentUser)),
+      flatMap(user => {
+        if (!user) throw new Error('No user signed in.');
+        return user.getIdToken();
       })
     );
   }
