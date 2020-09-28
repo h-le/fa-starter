@@ -1,7 +1,18 @@
 <div class="mat-app-background">
   <nav>
-    <a mat-icon-button routerLink="/"><mat-icon>album</mat-icon></a>
-    <a mat-icon-button routerLink="/likes"><mat-icon>queue_music</mat-icon></a>
+    <a mat-icon-button title="Recommendation" routerLink="/"
+      ><mat-icon>album</mat-icon></a
+    >
+    <a mat-icon-button title="Likes" routerLink="/likes"
+      ><mat-icon>queue_music</mat-icon></a
+    >
+    <a
+      mat-icon-button
+      title="Sign Out"
+      style="float: right;"
+      (click)="authService.signOut()"
+      ><mat-icon>directions_run</mat-icon></a
+    >
   </nav>
   <router-outlet></router-outlet>
 </div>
