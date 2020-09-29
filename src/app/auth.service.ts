@@ -24,7 +24,7 @@ export class AuthService {
     private auth: AngularFireAuth,
     private window: Window
   ) {
-    this.user = new Promise((resolve, reject) => {
+    this.user = new Promise(resolve => {
       this.auth.onAuthStateChanged(user => resolve(user));
     });
   }
