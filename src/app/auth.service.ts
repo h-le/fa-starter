@@ -25,7 +25,7 @@ export class AuthService {
     private auth: AngularFireAuth,
     private window: Window
   ) {
-    this.user = new Promise((resolve, reject) => {
+    this.user = new Promise(resolve => {
       this.auth.onAuthStateChanged(user => resolve(user));
     });
   }
@@ -62,18 +62,16 @@ export class AuthService {
   /** Authenticates a user, if not signed in, and returns an Observable for their ID token. */
   authenticateWithGoogle(): Observable<string> {
     return from(this.user).pipe(
+      flatMap(user =>
+        from(
+          user ? Promise.resolve()
+               : this.auth.signInWithPopup(new auth.GoogleAuthProvider())
+        )
+      ),
+      flatMap(() => from(this.auth.currentUser)),
       flatMap(user => {
-        const authPromise = user
-          ? Promise.resolve()
-          : this.auth.signInWithPopup(new auth.GoogleAuthProvider());
-        return from(authPromise).pipe(
-          flatMap(() => {
-            return this.auth.currentUser.then(user => {
-              if (user == null) throw new Error('No user signed in.');
-              return user.getIdToken();
-            });
-          })
-        );
+        if (!user) throw new Error('No user signed in.');
+        return user.getIdToken();
       })
     );
   }

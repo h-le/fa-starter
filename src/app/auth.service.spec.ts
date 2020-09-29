@@ -16,19 +16,31 @@ import {environment} from '../environments/environment';
 describe('AuthService', () => {
   let service: AuthService;
 
+  const idToken = 'idT0ken';
+
+  const user = {
+    displayName: 'John Doe',
+    email: 'jondoe@gmail.com',
+    uid: 'u1d',
+    getIdToken: () => Promise.resolve(idToken),
+  };
+
   const credential = {
     user: {},
     credential: {},
   };
 
-  const idToken = 'idT0ken';
-
-  const mockAngularFireAuth = jasmine.createSpyObj('AngularFireAuth', {
-    signInWithPopup: Promise.resolve(() => {
-      return credential;
-    }),
-    signOut: Promise.resolve(() => {}),
-  });
+  const mockAngularFireAuth = jasmine.createSpyObj(
+    'AngularFireAuth',
+    {
+      onAuthStateChanged: Promise.resolve(null),
+      signInWithPopup: Promise.resolve(() => {
+        return credential;
+      }),
+      signOut: Promise.resolve(() => {}),
+    },
+    {currentUser: Promise.resolve(user)}
+  );
 
   const mockWindow = {
     location: jasmine.createSpyObj('location', ['reload']),
@@ -53,11 +65,16 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
-  it(`should authenticate user with Google pop-up and return user's ID token`, () => {
-    service.authenticateWithGoogle();
-    expect(mockAngularFireAuth.signInWithPopup).toHaveBeenCalledWith(
-      new auth.GoogleAuthProvider()
-    );
+  it(`should authenticate user with Google pop-up and return user's ID token`, done => {
+    service.user = mockAngularFireAuth.onAuthStateChanged();
+    service.authenticateWithGoogle().subscribe(result => {
+      expect(mockAngularFireAuth.signInWithPopup).toHaveBeenCalledWith(
+        new auth.GoogleAuthProvider()
+      );
+      expect(mockAngularFireAuth.currentUser).toBeTruthy();
+      expect(result).toEqual(idToken);
+      done();
+    });
   });
 
   it('should sign the user out', () => {
