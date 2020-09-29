@@ -1,14 +1,58 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
+import {of} from 'rxjs';
 
 import {LikesComponent} from './likes.component';
+import {AuthService} from '../auth.service';
+
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
+
+import {MaterialModule} from '../material/material.module';
+
+import {AngularFireModule} from '@angular/fire';
+import {auth} from 'firebase/app';
+
+import {Like} from '../models/like.model';
+import {environment} from '../../environments/environment';
 
 describe('LikesComponent', () => {
   let component: LikesComponent;
   let fixture: ComponentFixture<LikesComponent>;
 
+  let authService;
+  let authenticateWithGoogleSpy;
+  let getLikesSpy;
+
+  const idToken: string = 'idToken';
+
+  const likes: Like[] = [
+    {uid: 'uid1', id: 0},
+    {uid: 'uid1', id: 1},
+  ];
+
   beforeEach(async(() => {
+    authService = jasmine.createSpyObj('AuthService', [
+      'authenticateWithGoogle',
+      'getLikes',
+    ]);
+
+    authenticateWithGoogleSpy = authService.authenticateWithGoogle.and.returnValue(
+      of(idToken)
+    );
+
+    getLikesSpy = authService.getLikes.and.returnValue(of(likes));
+
     TestBed.configureTestingModule({
+      imports: [
+        HttpClientTestingModule,
+        MaterialModule,
+        AngularFireModule.initializeApp(environment.firebaseConfig),
+      ],
       declarations: [LikesComponent],
+      providers: [{provide: AuthService, useValue: authService}],
     }).compileComponents();
   }));
 
@@ -21,4 +65,20 @@ describe('LikesComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should attempt to authenticate user then get their liked songs', async(() => {
+    expect(authenticateWithGoogleSpy.calls.any()).toBe(true);
+    expect(getLikesSpy.calls.any()).toBe(true);
+  }));
+
+  it('should return liked songs', async(() => {
+    component.likes$.subscribe(response => {
+      expect(response).toEqual(likes);
+    });
+  }));
+
+  it('should display the liked songs', async(() => {
+    const likes = fixture.debugElement.queryAll(By.css('.mat-list'));
+    expect(likes).not.toEqual([]);
+  }));
 });
