@@ -11,6 +11,7 @@ import {AngularFireAuth} from '@angular/fire/auth';
 import {auth} from 'firebase/app';
 
 import {Recommendation} from './models/recommendation.model';
+import {Like} from './models/like.model';
 import {environment} from '../environments/environment';
 
 describe('AuthService', () => {
@@ -84,12 +85,33 @@ describe('AuthService', () => {
     expect(mockAngularFireAuth.signOut).toHaveBeenCalled();
   });
 
+  it('should make HTTP request for liked songs', inject(
+    [HttpTestingController, AuthService],
+    (httpMock: HttpTestingController, authService: AuthService) => {
+      const idToken = 'idToken';
+
+      const likes: Like[] = [
+        {uid: 'uid1', id: 0},
+        {uid: 'uid1', id: 1},
+      ];
+
+      authService.getLikes(idToken).subscribe(response => {
+        expect(response['likes']).toEqual(likes);
+      });
+
+      const req = httpMock.expectOne(environment.url + '_likes');
+      expect(req.request.method).toEqual('GET');
+
+      req.flush({likes: likes});
+    }
+  ));
+
   it('should make HTTP request for song recommendation', inject(
     [HttpTestingController, AuthService],
     (httpMock: HttpTestingController, authService: AuthService) => {
       const idToken = 'idToken';
 
-      const recommendation = {
+      const recommendation: Recommendation = {
         album: 'Djesse, Vol. 3',
         apple_music_player_url:
           'https://genius.com/songs/5751704/apple_music_player',
