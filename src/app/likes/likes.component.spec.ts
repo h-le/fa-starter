@@ -79,7 +79,7 @@ describe('LikesComponent', () => {
 
   it('should display the liked songs', async(() => {
     const mat_list = fixture.debugElement.queryAll(By.css('.mat-list'));
-    expect(likes).not.toEqual([]);
+    expect(mat_list).not.toEqual([]);
 
     const mat_list_items = fixture.debugElement.queryAll(
       By.css('.mat-list-item')
