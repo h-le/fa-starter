@@ -1,7 +1,6 @@
 :host {
   align-items: center;
   display: flex;
-  height: 95%;
   justify-content: center;
 }
 
@@ -16,5 +15,6 @@
 
 .mat-card {
   background: #717f77;
+  margin-top: 23vh;
   width: 75%;
 }
