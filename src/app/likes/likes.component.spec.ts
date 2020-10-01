@@ -78,7 +78,24 @@ describe('LikesComponent', () => {
   }));
 
   it('should display the liked songs', async(() => {
-    const likes = fixture.debugElement.queryAll(By.css('.mat-list'));
+    const mat_list = fixture.debugElement.queryAll(By.css('.mat-list'));
     expect(likes).not.toEqual([]);
+
+    const mat_list_items = fixture.debugElement.queryAll(
+      By.css('.mat-list-item')
+    );
+
+    expect(mat_list_items.length).toEqual(likes.length);
+
+    const like_ids = likes.map(({id}) => id);
+    const mat_list_item_ids = mat_list_items.map(
+      list_item => +list_item.nativeElement.textContent
+    );
+
+    expect(like_ids).toEqual(mat_list_item_ids);
+
+    for (let list_item of mat_list_items) {
+      expect(list_item.classes['mat-list-item']).toBeTruthy();
+    }
   }));
 });
