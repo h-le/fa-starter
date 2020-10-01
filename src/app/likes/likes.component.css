@@ -1,9 +1,9 @@
 :host {
   align-items: center;
+  color: #717f77;
   display: flex;
   height: 95%;
   justify-content: center;
-  color: #717f77;
 }
 
 ::ng-deep .mat-progress-spinner circle,
