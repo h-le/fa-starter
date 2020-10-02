@@ -108,7 +108,43 @@ describe('LikesComponent', () => {
   }));
 
   it('should display the liked songs', async(() => {
-    const likes = fixture.debugElement.queryAll(By.css('.mat-grid-list'));
-    expect(likes).not.toEqual([]);
+    const mat_grid_list = fixture.debugElement.queryAll(
+      By.css('.mat-grid-list')
+    );
+
+    expect(mat_grid_list).not.toEqual([]);
+
+    const anchor_list_items = fixture.debugElement.queryAll(By.css('a'));
+
+    expect(anchor_list_items.length).toEqual(likes.length);
+
+    const anchor_list_content = anchor_list_items.map(list_item => {
+      const song_artist = /(.*) by (.*)/gm.exec(
+        list_item.nativeElement.getAttribute('title')
+      );
+      if (song_artist && song_artist.length == 3) {
+        return {
+          artist: String(song_artist[2]),
+          title: String(song_artist[1]),
+          song_art_image_url: String(
+            list_item.nativeElement
+              .getElementsByClassName('mat-grid-tile')[0]
+              .style.backgroundImage.replace(/url\(\"(.*)\"\)/gm, '$1')
+          ),
+          url: String(list_item.nativeElement.getAttribute('href')),
+        };
+      }
+    });
+
+    const expected_content = likes.map(
+      ({artist, title, song_art_image_url, url}) => ({
+        artist: String(artist),
+        title: String(title),
+        song_art_image_url: String(song_art_image_url),
+        url: String(url),
+      })
+    );
+
+    expect(anchor_list_content).toEqual(expected_content);
   }));
 });
