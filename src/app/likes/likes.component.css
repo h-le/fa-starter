@@ -1,5 +1,6 @@
 :host {
   align-items: center;
+  color: #717f77;
   display: flex;
   justify-content: center;
 }
@@ -9,12 +10,7 @@
   stroke: #dae59b;
 }
 
-.mat-icon-button {
-  color: #dae59b;
-}
-
-.mat-card {
-  background: #717f77;
-  margin-top: 23vh;
+.mat-grid-list {
+  margin-top: 3vh;
   width: 75%;
 }
