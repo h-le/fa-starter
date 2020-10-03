@@ -1,15 +1,11 @@
-import {
-  async,
-  fakeAsync,
-  tick,
-  ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {of} from 'rxjs';
 
 import {HomeComponent} from './home.component';
+
 import {AuthService} from '../auth.service';
+import {HttpService} from '../http.service';
 
 import {
   HttpClientTestingModule,
@@ -23,6 +19,7 @@ import {AngularFireModule} from '@angular/fire';
 import {auth} from 'firebase/app';
 
 import {Recommendation} from '../models/recommendation.model';
+
 import {environment} from '../../environments/environment';
 
 describe('HomeComponent', () => {
@@ -30,8 +27,9 @@ describe('HomeComponent', () => {
   let fixture: ComponentFixture<HomeComponent>;
 
   let authService;
+  let httpService;
   let authenticateWithGoogleSpy;
-  let getRecommendationSpy;
+  let getSpy;
 
   const idToken: string = 'idT0ken';
 
@@ -52,16 +50,15 @@ describe('HomeComponent', () => {
   beforeEach(async(() => {
     authService = jasmine.createSpyObj('AuthService', [
       'authenticateWithGoogle',
-      'getRecommendation',
     ]);
+
+    httpService = jasmine.createSpyObj('HttpService', ['get']);
 
     authenticateWithGoogleSpy = authService.authenticateWithGoogle.and.returnValue(
       of(idToken)
     );
 
-    getRecommendationSpy = authService.getRecommendation.and.returnValue(
-      of(recommendation)
-    );
+    getSpy = httpService.get.and.returnValue(of(recommendation));
 
     TestBed.configureTestingModule({
       imports: [
@@ -71,14 +68,16 @@ describe('HomeComponent', () => {
         AngularFireModule.initializeApp(environment.firebaseConfig),
       ],
       declarations: [HomeComponent],
-      providers: [{provide: AuthService, useValue: authService}],
+      providers: [
+        {provide: AuthService, useValue: authService},
+        {provide: HttpService, useValue: httpService},
+      ],
     }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -86,18 +85,65 @@ describe('HomeComponent', () => {
   });
 
   it('should attempt to authenticate user then get a song recommendation', async(() => {
+    spyOn(component, 'validateRecommendation');
+
+    fixture.detectChanges();
+
     expect(authenticateWithGoogleSpy.calls.any()).toBe(true);
-    expect(getRecommendationSpy.calls.any()).toBe(true);
+    expect(getSpy.calls.any()).toBe(true);
+    expect(component.validateRecommendation).toHaveBeenCalled();
   }));
 
   it('should return a song recommendation', async(() => {
+    fixture.detectChanges();
     component.recommendation$.subscribe(response => {
       expect(response).toEqual(recommendation);
     });
   }));
 
   it('should display the song recommendation', async(() => {
-    const song = fixture.debugElement.queryAll(By.css('.mat-card'));
-    expect(song).not.toEqual([]);
+    fixture.detectChanges();
+
+    const mat_card = fixture.debugElement.queryAll(By.css('.mat-card'));
+
+    expect(mat_card).not.toEqual([]);
+
+    const mat_card_content = mat_card.map(list_item => {
+      const song_artist = /(.*) by (.*)/gm.exec(
+        list_item.nativeElement.getElementsByClassName('mat-card-title')[0]
+          .textContent
+      );
+      if (song_artist && song_artist.length == 3) {
+        return {
+          album: list_item.nativeElement.getElementsByClassName(
+            'mat-card-subtitle'
+          )[0].textContent,
+          apple_music_player_url: String(
+            list_item.nativeElement
+              .getElementsByTagName('iframe')[0]
+              .getAttribute('src')
+          ),
+          artist: String(song_artist[2]),
+          title: String(song_artist[1]),
+          url: String(
+            list_item.nativeElement
+              .getElementsByTagName('a')[0]
+              .getAttribute('href')
+          ),
+        };
+      }
+    });
+
+    const expected_content = [recommendation].map(
+      ({album, apple_music_player_url, artist, title, url}) => ({
+        album: String(album),
+        apple_music_player_url: String(apple_music_player_url),
+        artist: String(artist),
+        title: String(title),
+        url: String(url),
+      })
+    );
+
+    expect(mat_card_content).toEqual(expected_content);
   }));
 });
