@@ -2,7 +2,6 @@
   align-items: center;
   color: #717f77;
   display: flex;
-  height: 95%;
   justify-content: center;
 }
 
@@ -11,6 +10,7 @@
   stroke: #dae59b;
 }
 
-.mat-list-item {
-  color: #717f77;
+.mat-grid-list {
+  margin-top: 3vh;
+  width: 75%;
 }

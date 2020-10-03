@@ -10,6 +10,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 
+import {SafePipeModule} from 'safe-pipe';
 import {MaterialModule} from '../material/material.module';
 
 import {AngularFireModule} from '@angular/fire';
@@ -29,8 +30,36 @@ describe('LikesComponent', () => {
   const idToken: string = 'idToken';
 
   const likes: Like[] = [
-    {uid: 'uid1', id: 0},
-    {uid: 'uid1', id: 1},
+    {
+      album: 'Depression Cherry',
+      apple_music_player_url:
+        'https://genius.com/songs/1929412/apple_music_player',
+      artist: 'Beach House',
+      email: 'moot@gmail.com',
+      embed_content:
+        "<div id='rg_embed_link_1929412' class='rg_embed_link' data-song-id='1929412'>Read <a href='https://genius.com/Beach-house-space-song-lyrics'>“Space Song” by Beach House</a> on Genius</div> <script crossorigin src='//genius.com/songs/1929412/embed.js'></script>",
+      id: 1929412,
+      song_art_image_url:
+        'https://images.genius.com/98ce1842b01c032eef50b8726fbbfba6.900x900x1.jpg',
+      title: 'Space Song',
+      uid: 'u1d',
+      url: 'https://genius.com/Beach-house-space-song-lyrics',
+    },
+    {
+      album: 'Non-Album Single',
+      apple_music_player_url:
+        'https://genius.com/songs/2979924/apple_music_player',
+      artist: 'Men I Trust',
+      email: 'moot@gmail.com',
+      embed_content:
+        "<div id='rg_embed_link_2979924' class='rg_embed_link' data-song-id='2979924'>Read <a href='https://genius.com/Men-i-trust-lauren-lyrics'>“Lauren” by Men I Trust</a> on Genius</div> <script crossorigin src='//genius.com/songs/2979924/embed.js'></script>",
+      id: 2979924,
+      song_art_image_url:
+        'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.1000x1000x1.jpg',
+      title: 'Lauren',
+      uid: 'u1d',
+      url: 'https://genius.com/Men-i-trust-lauren-lyrics',
+    },
   ];
 
   beforeEach(async(() => {
@@ -49,6 +78,7 @@ describe('LikesComponent', () => {
       imports: [
         HttpClientTestingModule,
         MaterialModule,
+        SafePipeModule,
         AngularFireModule.initializeApp(environment.firebaseConfig),
       ],
       declarations: [LikesComponent],
@@ -78,24 +108,43 @@ describe('LikesComponent', () => {
   }));
 
   it('should display the liked songs', async(() => {
-    const mat_list = fixture.debugElement.queryAll(By.css('.mat-list'));
-    expect(mat_list).not.toEqual([]);
-
-    const mat_list_items = fixture.debugElement.queryAll(
-      By.css('.mat-list-item')
+    const mat_grid_list = fixture.debugElement.queryAll(
+      By.css('.mat-grid-list')
     );
 
-    expect(mat_list_items.length).toEqual(likes.length);
+    expect(mat_grid_list).not.toEqual([]);
 
-    const like_ids = likes.map(({id}) => id);
-    const mat_list_item_ids = mat_list_items.map(
-      list_item => +list_item.nativeElement.textContent
+    const anchor_list_items = fixture.debugElement.queryAll(By.css('a'));
+
+    expect(anchor_list_items.length).toEqual(likes.length);
+
+    const anchor_list_content = anchor_list_items.map(list_item => {
+      const song_artist = /(.*) by (.*)/gm.exec(
+        list_item.nativeElement.getAttribute('title')
+      );
+      if (song_artist && song_artist.length == 3) {
+        return {
+          artist: String(song_artist[2]),
+          title: String(song_artist[1]),
+          song_art_image_url: String(
+            list_item.nativeElement
+              .getElementsByClassName('mat-grid-tile')[0]
+              .style.backgroundImage.replace(/url\(\"(.*)\"\)/gm, '$1')
+          ),
+          url: String(list_item.nativeElement.getAttribute('href')),
+        };
+      }
+    });
+
+    const expected_content = likes.map(
+      ({artist, title, song_art_image_url, url}) => ({
+        artist: String(artist),
+        title: String(title),
+        song_art_image_url: String(song_art_image_url),
+        url: String(url),
+      })
     );
 
-    expect(like_ids).toEqual(mat_list_item_ids);
-
-    for (let list_item of mat_list_items) {
-      expect(list_item.classes['mat-list-item']).toBeTruthy();
-    }
+    expect(anchor_list_content).toEqual(expected_content);
   }));
 });
