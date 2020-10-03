@@ -12,12 +12,19 @@ body {
   padding: 0;
 }
 
+body .mat-app-background {
+  background-color: #f1f1e7;
+  height: auto;
+  min-height: 100%;
+}
+
+.mat-icon-button {
+  color: #6b6a64;
+}
+
+mat-progress-spinner,
 mat-spinner {
   margin-left: auto;
   margin-right: auto;
-}
-
-mat-progress-spinner {
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: 23vh;
 }
