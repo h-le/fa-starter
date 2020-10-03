@@ -1,0 +1,16 @@
+:host {
+  align-items: center;
+  color: #717f77;
+  display: flex;
+  justify-content: center;
+}
+
+::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+  stroke: #dae59b;
+}
+
+.mat-grid-list {
+  margin-top: 3vh;
+  width: 75%;
+}

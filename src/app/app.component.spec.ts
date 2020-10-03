@@ -1,15 +1,12 @@
 import {TestBed, ComponentFixture, async, inject} from '@angular/core/testing';
-import {Router} from '@angular/router';
 import {By} from '@angular/platform-browser';
 
 import {AppComponent} from './app.component';
-import {LikesComponent} from './likes/likes.component';
-
 import {AuthService} from './auth.service';
 
-import {Location, CommonModule} from '@angular/common';
 import {RouterTestingModule} from '@angular/router/testing';
 import {MatIconModule} from '@angular/material/icon';
+
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -33,10 +30,7 @@ describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        CommonModule,
-        RouterTestingModule.withRoutes([
-          {path: 'likes', component: LikesComponent},
-        ]),
+        RouterTestingModule.withRoutes([]),
         MatIconModule,
         HttpClientTestingModule,
         AngularFireModule.initializeApp(environment.firebaseConfig),
@@ -59,45 +53,25 @@ describe('AppComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should route to the _home_ URL', async(
-    inject([Router, Location], (router: Router, location: Location) => {
-      const expected_location = '/';
+  it('should render route to the _home_ URL', () => {
+    const expected_location = '/';
 
-      const rendered_location = fixture.debugElement
-        .query(By.css('a[title="Recommendation"]'))
-        .nativeElement.getAttribute('href');
+    const rendered_location = fixture.debugElement
+      .query(By.css('a[title="Recommendation"]'))
+      .nativeElement.getAttribute('href');
 
-      expect(rendered_location).toEqual(expected_location);
+    expect(rendered_location).toEqual(expected_location);
+  });
 
-      fixture.debugElement
-        .query(By.css('a[title="Recommendation"]'))
-        .nativeElement.click();
+  it('should render route to the _likes_ URL', () => {
+    const expected_location = '/likes';
 
-      fixture.whenStable().then(() => {
-        expect(location.path()).toEqual(expected_location);
-      });
-    })
-  ));
+    const rendered_location = fixture.debugElement
+      .query(By.css('a[title="Likes"]'))
+      .nativeElement.getAttribute('href');
 
-  it('should route to the _likes_ URL', async(
-    inject([Router, Location], (router: Router, location: Location) => {
-      const expected_location = '/likes';
-
-      const rendered_location = fixture.debugElement
-        .query(By.css('a[title="Likes"]'))
-        .nativeElement.getAttribute('href');
-
-      expect(rendered_location).toEqual(expected_location);
-
-      fixture.debugElement
-        .query(By.css('a[title="Likes"]'))
-        .nativeElement.click();
-
-      fixture.whenStable().then(() => {
-        expect(location.path()).toEqual(expected_location);
-      });
-    })
-  ));
+    expect(rendered_location).toEqual(expected_location);
+  });
 
   it('should sign the user out', () => {
     fixture.debugElement

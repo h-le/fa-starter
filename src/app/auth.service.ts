@@ -10,6 +10,7 @@ import * as firebase from 'firebase';
 import {AngularFireAuth} from '@angular/fire/auth';
 
 import {Recommendation} from './models/recommendation.model';
+import {Like} from './models/like.model';
 import {environment} from '../environments/environment';
 
 @Injectable({
@@ -38,8 +39,15 @@ export class AuthService {
     return song;
   }
 
+  /** Returns an Observable for the songs liked by the signed-in user. */
+  getLikes(idToken: string): Observable<Like[]> {
+    return this.http.get<Like[]>(environment.url + '_likes', {
+      headers: this.headers.append('Authorization', 'Bearer ' + idToken),
+    });
+  }
+
   /** Returns an Observable for a song recommendation to the signed-in user. */
-  getRecommendation(idToken): Observable<Recommendation> {
+  getRecommendation(idToken: string): Observable<Recommendation> {
     return this.http
       .get<Recommendation>(environment.url + '_recommend', {
         headers: this.headers.append('Authorization', 'Bearer ' + idToken),

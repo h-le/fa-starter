@@ -34,6 +34,7 @@ describe('HomeComponent', () => {
   let getRecommendationSpy;
 
   const idToken: string = 'idT0ken';
+
   const recommendation: Recommendation = {
     album: 'Djesse, Vol. 3',
     apple_music_player_url:
