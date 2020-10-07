@@ -18,7 +18,6 @@ def logged_in(id_token):
 def get_song_id(id_token):
     """Gets a song ID (recommendation) for the logged in user."""
     uid = auth.verify_id_token(id_token)['uid']
-    # TODO Song selections will be based on multiple factors, e.g. time of day
     songs = {
         1929408, # Levitation by Beach House
         1929412, # Space Song by Beach House
