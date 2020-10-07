@@ -16,9 +16,16 @@ export class HttpService {
     this.headers = new HttpHeaders({'Content-Type': 'application/json'});
   }
 
-  /** Returns an Observable for HTTP response object. */
+  /** Sends HTTP GET request to server. */
   get<T>(idToken: string, endpoint: string): Observable<T> {
     return this.http.get<T>(environment.url + endpoint, {
+      headers: this.headers.append('Authorization', 'Bearer ' + idToken),
+    });
+  }
+
+  /** Sends HTTP POST request to server. */
+  post<T>(idToken: string, data: any, endpoint: string): Observable<T> {
+    return this.http.post<T>(environment.url + endpoint, data, {
       headers: this.headers.append('Authorization', 'Bearer ' + idToken),
     });
   }
