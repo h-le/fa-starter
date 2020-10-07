@@ -29,9 +29,15 @@ describe('HomeComponent', () => {
   let authService;
   let httpService;
   let authenticateWithGoogleSpy;
+  let getIdTokenSpy;
   let getSpy;
 
   const idToken: string = 'idT0ken';
+
+  const credential = {
+    user: {},
+    credential: {},
+  };
 
   const recommendation: Recommendation = {
     album: 'Djesse, Vol. 3',
@@ -47,16 +53,23 @@ describe('HomeComponent', () => {
     url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
   };
 
+  const mockWindow = {
+    location: jasmine.createSpyObj('location', ['reload']),
+  };
+
   beforeEach(async(() => {
     authService = jasmine.createSpyObj('AuthService', [
       'authenticateWithGoogle',
+      'getIdToken',
     ]);
 
     httpService = jasmine.createSpyObj('HttpService', ['get']);
 
     authenticateWithGoogleSpy = authService.authenticateWithGoogle.and.returnValue(
-      of(idToken)
+      of(credential)
     );
+
+    getIdTokenSpy = authService.getIdToken.and.returnValue(of(idToken));
 
     getSpy = httpService.get.and.returnValue(of(recommendation));
 
@@ -69,6 +82,7 @@ describe('HomeComponent', () => {
       ],
       declarations: [HomeComponent],
       providers: [
+        {provide: Window, useValue: mockWindow},
         {provide: AuthService, useValue: authService},
         {provide: HttpService, useValue: httpService},
       ],
@@ -90,6 +104,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
 
     expect(authenticateWithGoogleSpy.calls.any()).toBe(true);
+    expect(getIdTokenSpy.calls.any()).toBe(true);
     expect(getSpy.calls.any()).toBe(true);
     expect(component.validateRecommendation).toHaveBeenCalled();
   }));
@@ -113,6 +128,7 @@ describe('HomeComponent', () => {
         list_item.nativeElement.getElementsByClassName('mat-card-title')[0]
           .textContent
       );
+
       if (song_artist && song_artist.length == 3) {
         return {
           album: list_item.nativeElement.getElementsByClassName(
@@ -127,7 +143,7 @@ describe('HomeComponent', () => {
           title: String(song_artist[1]),
           url: String(
             list_item.nativeElement
-              .getElementsByTagName('a')[0]
+              .getElementsByTagName('a')[2]
               .getAttribute('href')
           ),
         };
@@ -145,5 +161,21 @@ describe('HomeComponent', () => {
     );
 
     expect(mat_card_content).toEqual(expected_content);
+  }));
+
+  it('should call likeRecommendation() when _add_ button clicked', async(() => {
+    spyOn(component, 'likeRecommendation');
+
+    fixture.detectChanges();
+
+    fixture.debugElement.queryAll(By.css('a'))[0].nativeElement.click();
+    expect(component.likeRecommendation).toHaveBeenCalled();
+  }));
+
+  it('should reload the window when _next track_ button clicked', async(() => {
+    fixture.detectChanges();
+
+    fixture.debugElement.queryAll(By.css('a'))[1].nativeElement.click();
+    expect(component.window.location.reload).toHaveBeenCalled();
   }));
 });
