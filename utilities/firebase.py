@@ -11,7 +11,6 @@ def logged_in(id_token):
     try:
         auth.verify_id_token(id_token)
     except auth.InvalidIdTokenError:
-        # TODO Include exceptions for ExpiredIdTokenError, RevokedIdTokenError, ...
         return False
     return True
 
