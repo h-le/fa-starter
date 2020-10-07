@@ -8,7 +8,7 @@ class TestFirebase(absltest.TestCase):
     """Firebase Testing Class"""
     def setUp(self): # pylint: disable=invalid-name
         """Set-up
-            Mock ID token, jwt, song, and like
+            Mock ID token, jwt, song, like, and transaction
         """
         self.id_token = 'idT0ken'
         self.jwt = {
