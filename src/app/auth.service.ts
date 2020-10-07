@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 
-import {Observable, from} from 'rxjs';
-import {flatMap} from 'rxjs/operators';
+import {Observable, from, of} from 'rxjs';
+import {flatMap, map} from 'rxjs/operators';
 
 import 'firebase/auth';
 import {auth} from 'firebase/app';
@@ -20,18 +20,25 @@ export class AuthService {
     });
   }
 
-  /** Authenticates a user, if not signed in, and returns an Observable for their ID token. */
-  authenticateWithGoogle(): Observable<string> {
+  /** Authenticate a user, if they aren't already signed in. */
+  authenticateWithGoogle(): Observable<firebase.User | auth.UserCredential> {
     return from(this.user).pipe(
-      flatMap(user =>
-        from(
-          user ? Promise.resolve()
-               : this.auth.signInWithPopup(new auth.GoogleAuthProvider())
-        )
+      flatMap((user: firebase.User) =>
+        user ? Promise.resolve(user)
+             : this.auth.signInWithPopup(new auth.GoogleAuthProvider())
       ),
-      flatMap(() => from(this.auth.currentUser)),
-      flatMap(user => {
-        if (!user) throw new Error('No user signed in.');
+      map((user: firebase.User) => {
+        if (user.hasOwnProperty('credential')) this.window.location.reload();
+        return user;
+      })
+    );
+  }
+
+  /** Get the ID token of the signed in user. */
+  getIdToken(): Observable<string> {
+    return from(this.auth.currentUser).pipe(
+      flatMap((user: firebase.User) => {
+        if (!user) throw new Error('No user signed in!');
         return user.getIdToken();
       })
     );

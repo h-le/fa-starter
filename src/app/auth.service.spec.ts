@@ -56,13 +56,19 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
-  it(`should authenticate user with Google pop-up and return user's ID token`, done => {
+  it('should authenticate user with Google pop-up, if no user signed in', done => {
     service.user = mockAngularFireAuth.onAuthStateChanged();
     service.authenticateWithGoogle().subscribe(result => {
       expect(mockAngularFireAuth.signInWithPopup).toHaveBeenCalledWith(
         new auth.GoogleAuthProvider()
       );
-      expect(mockAngularFireAuth.currentUser).toBeTruthy();
+      done();
+    });
+  });
+
+  it(`should get the signed in user's ID token`, done => {
+    expect(mockAngularFireAuth.currentUser).toBeTruthy();
+    service.getIdToken().subscribe(result => {
       expect(result).toEqual(idToken);
       done();
     });
