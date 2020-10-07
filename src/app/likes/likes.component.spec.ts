@@ -3,7 +3,9 @@ import {By} from '@angular/platform-browser';
 import {of} from 'rxjs';
 
 import {LikesComponent} from './likes.component';
+
 import {AuthService} from '../auth.service';
+import {HttpService} from '../http.service';
 
 import {
   HttpClientTestingModule,
@@ -17,6 +19,7 @@ import {AngularFireModule} from '@angular/fire';
 import {auth} from 'firebase/app';
 
 import {Like} from '../models/like.model';
+
 import {environment} from '../../environments/environment';
 
 describe('LikesComponent', () => {
@@ -24,8 +27,9 @@ describe('LikesComponent', () => {
   let fixture: ComponentFixture<LikesComponent>;
 
   let authService;
+  let httpService;
   let authenticateWithGoogleSpy;
-  let getLikesSpy;
+  let getSpy;
 
   const idToken: string = 'idToken';
 
@@ -65,14 +69,15 @@ describe('LikesComponent', () => {
   beforeEach(async(() => {
     authService = jasmine.createSpyObj('AuthService', [
       'authenticateWithGoogle',
-      'getLikes',
     ]);
+
+    httpService = jasmine.createSpyObj('HttpService', ['get']);
 
     authenticateWithGoogleSpy = authService.authenticateWithGoogle.and.returnValue(
       of(idToken)
     );
 
-    getLikesSpy = authService.getLikes.and.returnValue(of(likes));
+    getSpy = httpService.get.and.returnValue(of(likes));
 
     TestBed.configureTestingModule({
       imports: [
@@ -82,7 +87,10 @@ describe('LikesComponent', () => {
         AngularFireModule.initializeApp(environment.firebaseConfig),
       ],
       declarations: [LikesComponent],
-      providers: [{provide: AuthService, useValue: authService}],
+      providers: [
+        {provide: AuthService, useValue: authService},
+        {provide: HttpService, useValue: httpService},
+      ],
     }).compileComponents();
   }));
 
@@ -98,7 +106,7 @@ describe('LikesComponent', () => {
 
   it('should attempt to authenticate user then get their liked songs', async(() => {
     expect(authenticateWithGoogleSpy.calls.any()).toBe(true);
-    expect(getLikesSpy.calls.any()).toBe(true);
+    expect(getSpy.calls.any()).toBe(true);
   }));
 
   it('should return liked songs', async(() => {
