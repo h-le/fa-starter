@@ -64,3 +64,13 @@ def get_likes():
         return flask.abort(401, 'User not logged in!')
     likes = bigquery.get_likes(id_token)
     return flask.jsonify(likes)
+
+@app.route('/_like', methods=['POST'])
+def post_like():
+    """Adds song to verified user's list of liked songs."""
+    id_token = flask.request.headers['Authorization'].split(' ').pop()
+    if not firebase.logged_in(id_token):
+        return flask.abort(401, 'User not logged in!')
+    song = flask.request.get_json()
+    like = firebase.like_song(id_token, song)
+    return flask.jsonify(like)
