@@ -31,7 +31,7 @@ class TestFirebase(absltest.TestCase):
             'url': 'https://genius.com/Men-i-trust-lauren-lyrics',
         }
         self.like = {
-            'album': None,
+            'album': 'Non-Album Single',
             'apple_music_player_url': 'https://genius.com/songs/2979924/apple_music_player',
             'artist': 'Men I Trust',
             'email': 'moot@gmail.com',
