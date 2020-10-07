@@ -10,6 +10,10 @@
   stroke: #dae59b;
 }
 
+h3 {
+  margin-top: 23vh;
+}
+
 .mat-grid-list {
   margin-top: 3vh;
   width: 75%;
