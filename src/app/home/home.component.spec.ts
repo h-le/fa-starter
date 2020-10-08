@@ -19,6 +19,7 @@ import {AngularFireModule} from '@angular/fire';
 import {auth} from 'firebase/app';
 
 import {Recommendation} from '../models/recommendation.model';
+import {Like} from '../models/like.model';
 
 import {environment} from '../../environments/environment';
 
@@ -31,6 +32,7 @@ describe('HomeComponent', () => {
   let authenticateWithGoogleSpy;
   let getIdTokenSpy;
   let getSpy;
+  let postSpy;
 
   const idToken: string = 'idT0ken';
 
@@ -53,6 +55,22 @@ describe('HomeComponent', () => {
     url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
   };
 
+  const like: Like = {
+    album: 'Djesse, Vol. 3',
+    apple_music_player_url:
+      'https://genius.com/songs/5751704/apple_music_player',
+    artist: 'Jacob Collier',
+    email: 'moot@gmail.com',
+    embed_content:
+      "<div id='rg_embed_link_5751704' class='rg_embed_link' data-song-id='5751704'>Read <a href='https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics'>“Sleeping on My Dreams” by Jacob Collier</a> on Genius</div> <script crossorigin src='//genius.com/songs/5751704/embed.js'></script>",
+    id: 5751704,
+    song_art_image_url:
+      'https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg',
+    title: 'Sleeping on My Dreams',
+    uid: 'u1d',
+    url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
+  };
+
   const mockWindow = {
     location: jasmine.createSpyObj('location', ['reload']),
   };
@@ -63,7 +81,7 @@ describe('HomeComponent', () => {
       'getIdToken',
     ]);
 
-    httpService = jasmine.createSpyObj('HttpService', ['get']);
+    httpService = jasmine.createSpyObj('HttpService', ['get', 'post']);
 
     authenticateWithGoogleSpy = authService.authenticateWithGoogle.and.returnValue(
       of(credential)
@@ -72,6 +90,7 @@ describe('HomeComponent', () => {
     getIdTokenSpy = authService.getIdToken.and.returnValue(of(idToken));
 
     getSpy = httpService.get.and.returnValue(of(recommendation));
+    postSpy = httpService.post.and.returnValue(of(like));
 
     TestBed.configureTestingModule({
       imports: [
@@ -163,13 +182,30 @@ describe('HomeComponent', () => {
     expect(mat_card_content).toEqual(expected_content);
   }));
 
-  it('should call likeRecommendation() when _add_ button clicked', async(() => {
-    spyOn(component, 'likeRecommendation');
+  it('should call likeClicked.next() when _add_ button clicked', async(() => {
+    spyOn(component.likeClicked, 'next');
 
     fixture.detectChanges();
 
     fixture.debugElement.queryAll(By.css('a'))[0].nativeElement.click();
-    expect(component.likeRecommendation).toHaveBeenCalled();
+    expect(component.likeClicked.next).toHaveBeenCalled();
+  }));
+
+  it(`should mark song as liked, from 'false' to 'true'`, async(() => {
+    fixture.detectChanges();
+
+    let index: number = 0;
+    const expectedLiked: boolean[] = [false, true];
+
+    component.liked$.subscribe(liked => {
+      expect(liked).toEqual(expectedLiked[index]);
+      index++;
+    });
+
+    fixture.debugElement.queryAll(By.css('a'))[0].nativeElement.click();
+
+    expect(getIdTokenSpy.calls.any()).toBe(true);
+    expect(postSpy.calls.any()).toBe(true);
   }));
 
   it('should reload the window when _next track_ button clicked', async(() => {
