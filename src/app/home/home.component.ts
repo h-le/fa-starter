@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 
-import {Observable, from, of} from 'rxjs';
-import {flatMap, map} from 'rxjs/operators';
+import {Observable, Subject, OperatorFunction, pipe} from 'rxjs';
+import {flatMap, map, startWith} from 'rxjs/operators';
 
 import {Recommendation} from '../models/recommendation.model';
 import {Like} from '../models/like.model';
@@ -15,8 +15,10 @@ import {HttpService} from '../http.service';
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
-  recommendation$: Observable<Recommendation>;
-  liked$: Observable<boolean>;
+  readonly recommendation$: Observable<Recommendation>;
+  readonly liked$: Observable<boolean>;
+
+  likeClicked = new Subject<Recommendation>();
 
   constructor(
     public window: Window,
@@ -30,7 +32,7 @@ export class HomeComponent {
       ),
       map((song: Recommendation) => this.validateRecommendation(song))
     );
-    this.liked$ = of(false);
+    this.liked$ = this.likeClicked.pipe(this.likeRecommendation);
   }
 
   /** Validates/processes song recommendation. */
@@ -39,12 +41,16 @@ export class HomeComponent {
   }
 
   /** Adds the recommended song to the user's liked songs. */
-  likeRecommendation(song: Recommendation) {
-    this.liked$ = this.authService.getIdToken().pipe(
-      flatMap((idToken: string) =>
-        this.httpService.post<Like>(idToken, song, '_like')
-      ),
-      map((like: Like) => !!like)
-    );
-  }
+  likeRecommendation: OperatorFunction<Recommendation, boolean> = pipe(
+    flatMap((song: Recommendation) =>
+      this.authService
+        .getIdToken()
+        .pipe(map((idToken: string) => [song, idToken]))
+    ),
+    flatMap(([song, idToken]: [Recommendation, string]) =>
+      this.httpService.post<Like>(idToken, song, '_like')
+    ),
+    map((like: Like) => !!like),
+    startWith(false)
+  );
 }

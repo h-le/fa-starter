@@ -20,7 +20,7 @@
         mat-icon-button
         title="Like"
         [disabled]="liked.status"
-        (click)="likeRecommendation(recommendation)"
+        (click)="!liked.status && likeClicked.next(recommendation)"
         ><mat-icon>{{liked.status ? 'check' : 'add'}}</mat-icon></a
       >
       <a mat-icon-button title="Next Track" (click)="window.location.reload()"
