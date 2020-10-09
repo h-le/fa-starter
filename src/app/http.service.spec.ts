@@ -30,6 +30,22 @@ describe('HttpService', () => {
     url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
   };
 
+  const like: Like = {
+    album: 'Djesse, Vol. 3',
+    apple_music_player_url:
+      'https://genius.com/songs/5751704/apple_music_player',
+    artist: 'Jacob Collier',
+    email: 'moot@gmail.com',
+    embed_content:
+      "<div id='rg_embed_link_5751704' class='rg_embed_link' data-song-id='5751704'>Read <a href='https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics'>“Sleeping on My Dreams” by Jacob Collier</a> on Genius</div> <script crossorigin src='//genius.com/songs/5751704/embed.js'></script>",
+    id: 5751704,
+    song_art_image_url:
+      'https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg',
+    title: 'Sleeping on My Dreams',
+    uid: 'u1d',
+    url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
+  };
+
   const likes: Like[] = [
     {
       album: 'Depression Cherry',
@@ -105,6 +121,23 @@ describe('HttpService', () => {
       expect(req.request.method).toEqual('GET');
 
       req.flush(likes);
+    }
+  ));
+
+  it('should request to _like_ the recommendation and return the `Like`', inject(
+    [HttpTestingController, HttpService],
+    (httpMock: HttpTestingController, httpService: HttpService) => {
+      const endpoint = '_like';
+
+      httpService
+        .post<Like>(idToken, recommendation, endpoint)
+        .subscribe(response => expect(response).toEqual(like));
+
+      const req = httpMock.expectOne(environment.url + endpoint);
+
+      expect(req.request.method).toEqual('POST');
+
+      req.flush(like);
     }
   ));
 

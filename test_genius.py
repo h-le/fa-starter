@@ -25,7 +25,7 @@ class TestGenius(absltest.TestCase):
                 "“Lauren” by Men\xa0I Trust</a> on Genius</div> <script " \
                 "crossorigin src='//genius.com/songs/2979924/embed.js'></script>",
             'id': 2979924,
-            'song_art_image_thumbnail_url': \
+            'song_art_image_url': \
                 'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg',
             'title': 'Lauren',
             'url': 'https://genius.com/Men-i-trust-lauren-lyrics',
@@ -52,7 +52,7 @@ class TestGenius(absltest.TestCase):
                         "“Lauren” by Men\xa0I Trust</a> on Genius</div> <script " \
                         "crossorigin src='//genius.com/songs/2979924/embed.js'></script>",
                     'id': 2979924,
-                    'song_art_image_thumbnail_url': \
+                    'song_art_image_url': \
                         'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg',
                     'title': 'Lauren',
                     'url': 'https://genius.com/Men-i-trust-lauren-lyrics',

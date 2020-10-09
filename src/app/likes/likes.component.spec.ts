@@ -29,9 +29,15 @@ describe('LikesComponent', () => {
   let authService;
   let httpService;
   let authenticateWithGoogleSpy;
+  let getIdTokenSpy;
   let getSpy;
 
   const idToken: string = 'idToken';
+
+  const credential = {
+    user: {},
+    credential: {},
+  };
 
   const likes: Like[] = [
     {
@@ -69,13 +75,16 @@ describe('LikesComponent', () => {
   beforeEach(async(() => {
     authService = jasmine.createSpyObj('AuthService', [
       'authenticateWithGoogle',
+      'getIdToken',
     ]);
 
     httpService = jasmine.createSpyObj('HttpService', ['get']);
 
     authenticateWithGoogleSpy = authService.authenticateWithGoogle.and.returnValue(
-      of(idToken)
+      of(credential)
     );
+
+    getIdTokenSpy = authService.getIdToken.and.returnValue(of(idToken));
 
     getSpy = httpService.get.and.returnValue(of(likes));
 
@@ -106,6 +115,7 @@ describe('LikesComponent', () => {
 
   it('should attempt to authenticate user then get their liked songs', async(() => {
     expect(authenticateWithGoogleSpy.calls.any()).toBe(true);
+    expect(getIdTokenSpy.calls.any()).toBe(true);
     expect(getSpy.calls.any()).toBe(true);
   }));
 

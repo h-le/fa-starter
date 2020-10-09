@@ -14,19 +14,15 @@ import {HttpService} from '../http.service';
   styleUrls: ['./likes.component.css'],
 })
 export class LikesComponent {
-  endpoint: string = '_likes';
   likes$: Observable<Like[]>;
 
   constructor(
     public authService: AuthService,
     public httpService: HttpService
   ) {
-    this.likes$ = authService
-      .authenticateWithGoogle()
-      .pipe(
-        flatMap((idToken: string) =>
-          httpService.get<Like[]>(idToken, this.endpoint)
-        )
-      );
+    this.likes$ = authService.authenticateWithGoogle().pipe(
+      flatMap(() => authService.getIdToken()),
+      flatMap((idToken: string) => httpService.get<Like[]>(idToken, '_likes'))
+    );
   }
 }

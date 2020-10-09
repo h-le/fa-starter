@@ -10,5 +10,6 @@ export interface Like {
   title?: string;
   /** Firebase ID of user that liked this song */
   uid?: string;
+  /** URL to this song's page on genius.com */
   url?: string;
 }

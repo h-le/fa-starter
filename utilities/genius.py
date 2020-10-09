@@ -17,7 +17,7 @@ def get_song(song_id):
         'artist': song['primary_artist']['name'],
         'embed_content': song['embed_content'],
         'id': song['id'],
-        'song_art_image_thumbnail_url': song['song_art_image_thumbnail_url'],
+        'song_art_image_url': song['song_art_image_url'],
         'title': song['title'],
         'url': song['url'],
     }

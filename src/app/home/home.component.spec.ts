@@ -19,6 +19,7 @@ import {AngularFireModule} from '@angular/fire';
 import {auth} from 'firebase/app';
 
 import {Recommendation} from '../models/recommendation.model';
+import {Like} from '../models/like.model';
 
 import {environment} from '../../environments/environment';
 
@@ -29,9 +30,16 @@ describe('HomeComponent', () => {
   let authService;
   let httpService;
   let authenticateWithGoogleSpy;
+  let getIdTokenSpy;
   let getSpy;
+  let postSpy;
 
   const idToken: string = 'idT0ken';
+
+  const credential = {
+    user: {},
+    credential: {},
+  };
 
   const recommendation: Recommendation = {
     album: 'Djesse, Vol. 3',
@@ -47,18 +55,42 @@ describe('HomeComponent', () => {
     url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
   };
 
+  const like: Like = {
+    album: 'Djesse, Vol. 3',
+    apple_music_player_url:
+      'https://genius.com/songs/5751704/apple_music_player',
+    artist: 'Jacob Collier',
+    email: 'moot@gmail.com',
+    embed_content:
+      "<div id='rg_embed_link_5751704' class='rg_embed_link' data-song-id='5751704'>Read <a href='https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics'>“Sleeping on My Dreams” by Jacob Collier</a> on Genius</div> <script crossorigin src='//genius.com/songs/5751704/embed.js'></script>",
+    id: 5751704,
+    song_art_image_url:
+      'https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg',
+    title: 'Sleeping on My Dreams',
+    uid: 'u1d',
+    url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
+  };
+
+  const mockWindow = {
+    location: jasmine.createSpyObj('location', ['reload']),
+  };
+
   beforeEach(async(() => {
     authService = jasmine.createSpyObj('AuthService', [
       'authenticateWithGoogle',
+      'getIdToken',
     ]);
 
-    httpService = jasmine.createSpyObj('HttpService', ['get']);
+    httpService = jasmine.createSpyObj('HttpService', ['get', 'post']);
 
     authenticateWithGoogleSpy = authService.authenticateWithGoogle.and.returnValue(
-      of(idToken)
+      of(credential)
     );
 
+    getIdTokenSpy = authService.getIdToken.and.returnValue(of(idToken));
+
     getSpy = httpService.get.and.returnValue(of(recommendation));
+    postSpy = httpService.post.and.returnValue(of(like));
 
     TestBed.configureTestingModule({
       imports: [
@@ -69,6 +101,7 @@ describe('HomeComponent', () => {
       ],
       declarations: [HomeComponent],
       providers: [
+        {provide: Window, useValue: mockWindow},
         {provide: AuthService, useValue: authService},
         {provide: HttpService, useValue: httpService},
       ],
@@ -90,6 +123,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
 
     expect(authenticateWithGoogleSpy.calls.any()).toBe(true);
+    expect(getIdTokenSpy.calls.any()).toBe(true);
     expect(getSpy.calls.any()).toBe(true);
     expect(component.validateRecommendation).toHaveBeenCalled();
   }));
@@ -113,6 +147,7 @@ describe('HomeComponent', () => {
         list_item.nativeElement.getElementsByClassName('mat-card-title')[0]
           .textContent
       );
+
       if (song_artist && song_artist.length == 3) {
         return {
           album: list_item.nativeElement.getElementsByClassName(
@@ -127,7 +162,7 @@ describe('HomeComponent', () => {
           title: String(song_artist[1]),
           url: String(
             list_item.nativeElement
-              .getElementsByTagName('a')[0]
+              .getElementsByTagName('a')[2]
               .getAttribute('href')
           ),
         };
@@ -145,5 +180,38 @@ describe('HomeComponent', () => {
     );
 
     expect(mat_card_content).toEqual(expected_content);
+  }));
+
+  it('should call likeClicked.next() when _add_ button clicked', async(() => {
+    spyOn(component.likeClicked, 'next');
+
+    fixture.detectChanges();
+
+    fixture.debugElement.queryAll(By.css('a'))[0].nativeElement.click();
+    expect(component.likeClicked.next).toHaveBeenCalled();
+  }));
+
+  it(`should mark song as liked, from 'false' to 'true'`, async(() => {
+    fixture.detectChanges();
+
+    let index: number = 0;
+    const expectedLiked: boolean[] = [false, true];
+
+    component.liked$.subscribe(liked => {
+      expect(liked).toEqual(expectedLiked[index]);
+      index++;
+    });
+
+    fixture.debugElement.queryAll(By.css('a'))[0].nativeElement.click();
+
+    expect(getIdTokenSpy.calls.any()).toBe(true);
+    expect(postSpy.calls.any()).toBe(true);
+  }));
+
+  it('should reload the window when _next track_ button clicked', async(() => {
+    fixture.detectChanges();
+
+    fixture.debugElement.queryAll(By.css('a'))[1].nativeElement.click();
+    expect(component.window.location.reload).toHaveBeenCalled();
   }));
 });

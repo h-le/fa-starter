@@ -7,7 +7,6 @@ db = bigquery.Client()
 
 def get_likes(id_token):
     """Gets liked songs for the logged in user."""
-    # TODO Guard against potential failures (?)
     uid = auth.verify_id_token(id_token)['uid']
     query = f'''
         select
