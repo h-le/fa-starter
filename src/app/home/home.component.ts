@@ -32,7 +32,10 @@ export class HomeComponent {
       ),
       map((song: Recommendation) => this.validateRecommendation(song))
     );
-    this.liked$ = this.likeClicked.pipe(this.likeRecommendation);
+    this.liked$ = this.likeClicked.pipe(
+      this.likeRecommendation,
+      startWith(false)
+    );
   }
 
   /** Validates/processes song recommendation. */
@@ -50,7 +53,6 @@ export class HomeComponent {
     flatMap(([song, idToken]: [Recommendation, string]) =>
       this.httpService.post<Like>(idToken, song, '_like')
     ),
-    map((like: Like) => !!like),
-    startWith(false)
+    map((like: Like) => !!like)
   );
 }
