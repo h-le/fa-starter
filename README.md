@@ -21,3 +21,17 @@ To run in production mode:
 - `ng build --prod`
 - `npm start`
 - navigate to http://localhost:8000 (or whatever your flask instance is)
+
+To deploy Cloud Functions:
+
+- `cd functions/<cloud-function>/`, e.g. `cd functions/add_recommendations/`
+- Run the following command (using `add-recommendations` as an example):
+  ```bash
+  gcloud functions deploy add-recommendations \
+    --entry-point entry_point \
+    --timeout <timeout, in seconds> \
+    --runtime python38 \
+    --set-env-vars GENIUS_ACCESS_TOKEN=<Genius access token> \
+    --region <region> \
+    --trigger-http --allow-unauthenticated
+  ```
