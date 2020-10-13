@@ -17,9 +17,10 @@ export class HttpService {
   }
 
   /** Sends HTTP GET request to server. */
-  get<T>(idToken: string, endpoint: string): Observable<T> {
+  get<T>(idToken: string, endpoint: string, data: any = {}): Observable<T> {
     return this.http.get<T>(environment.url + endpoint, {
       headers: this.headers.append('Authorization', 'Bearer ' + idToken),
+      params: data,
     });
   }
 
