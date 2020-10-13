@@ -6,6 +6,7 @@ import {HomeComponent} from './home.component';
 
 import {AuthService} from '../auth.service';
 import {HttpService} from '../http.service';
+import {TimeService} from '../time.service';
 
 import {
   HttpClientTestingModule,
@@ -29,10 +30,12 @@ describe('HomeComponent', () => {
 
   let authService;
   let httpService;
+  let timeService;
   let authenticateWithGoogleSpy;
   let getIdTokenSpy;
   let getSpy;
   let postSpy;
+  let timeOfDaySpy;
 
   const idToken: string = 'idT0ken';
 
@@ -51,6 +54,7 @@ describe('HomeComponent', () => {
     id: 5751704,
     song_art_image_url:
       'https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg',
+    time_of_day: 'afternoon',
     title: 'Sleeping on My Dreams',
     url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
   };
@@ -66,6 +70,7 @@ describe('HomeComponent', () => {
     id: 5751704,
     song_art_image_url:
       'https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg',
+    time_of_day: 'afternoon',
     title: 'Sleeping on My Dreams',
     uid: 'u1d',
     url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
@@ -83,6 +88,8 @@ describe('HomeComponent', () => {
 
     httpService = jasmine.createSpyObj('HttpService', ['get', 'post']);
 
+    timeService = jasmine.createSpyObj('TimeService', ['timeOfDay']);
+
     authenticateWithGoogleSpy = authService.authenticateWithGoogle.and.returnValue(
       of(credential)
     );
@@ -91,6 +98,8 @@ describe('HomeComponent', () => {
 
     getSpy = httpService.get.and.returnValue(of(recommendation));
     postSpy = httpService.post.and.returnValue(of(like));
+
+    timeOfDaySpy = timeService.timeOfDay.and.returnValue('afternoon');
 
     TestBed.configureTestingModule({
       imports: [
@@ -104,6 +113,7 @@ describe('HomeComponent', () => {
         {provide: Window, useValue: mockWindow},
         {provide: AuthService, useValue: authService},
         {provide: HttpService, useValue: httpService},
+        {provide: TimeService, useValue: timeService},
       ],
     }).compileComponents();
   }));
@@ -124,6 +134,7 @@ describe('HomeComponent', () => {
 
     expect(authenticateWithGoogleSpy.calls.any()).toBe(true);
     expect(getIdTokenSpy.calls.any()).toBe(true);
+    expect(timeOfDaySpy.calls.any()).toBe(true);
     expect(getSpy.calls.any()).toBe(true);
     expect(component.validateRecommendation).toHaveBeenCalled();
   }));

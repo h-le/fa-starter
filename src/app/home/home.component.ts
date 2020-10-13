@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 
-import {Observable, Subject, OperatorFunction, pipe} from 'rxjs';
+import {Observable, Subject, OperatorFunction, pipe, interval} from 'rxjs';
 import {flatMap, map, startWith} from 'rxjs/operators';
 
 import {Recommendation} from '../models/recommendation.model';
@@ -8,6 +8,7 @@ import {Like} from '../models/like.model';
 
 import {AuthService} from '../auth.service';
 import {HttpService} from '../http.service';
+import {TimeService} from '../time.service';
 
 @Component({
   selector: 'app-home',
@@ -23,12 +24,15 @@ export class HomeComponent {
   constructor(
     public window: Window,
     public authService: AuthService,
-    public httpService: HttpService
+    public httpService: HttpService,
+    public timeService: TimeService
   ) {
     this.recommendation$ = authService.authenticateWithGoogle().pipe(
       flatMap(() => authService.getIdToken()),
       flatMap((idToken: string) =>
-        httpService.get<Recommendation>(idToken, '_recommend')
+        httpService.get<Recommendation>(idToken, '_recommend', {
+          time_of_day: timeService.timeOfDay(),
+        })
       ),
       map((song: Recommendation) => this.validateRecommendation(song))
     );
