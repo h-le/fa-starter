@@ -23,6 +23,7 @@ class TestFirebase(absltest.TestCase):
         'id': 2979924,
         'song_art_image_thumbnail_url': \
             'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg',
+        'time_of_day': 'afternoon',
         'title': 'Lauren',
         'url': 'https://genius.com/Men-i-trust-lauren-lyrics',
     }
@@ -39,6 +40,7 @@ class TestFirebase(absltest.TestCase):
         'id': 2979924,
         'song_art_image_thumbnail_url': \
             'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg',
+        'time_of_day': 'afternoon',
         'title': 'Lauren',
         'uid': 'u1d',
         'url': 'https://genius.com/Men-i-trust-lauren-lyrics',
