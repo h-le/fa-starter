@@ -31,13 +31,13 @@ def get_song_metadata(artist, title, time_of_day):
 def entry_point(request): # pylint: disable=unused-argument
     """Cloud Function Entry Point
     """
-    df = pd.DataFrame( # pylint: disable=invalid-name
+    song_metadata_df = pd.DataFrame(
         [g for g in [get_song_metadata(*lbz) \
             for lbz in bigquery.get_listen_brainz()] \
         if g]
     )
     pd_gbq.to_gbq(
-        df,
+        song_metadata_df,
         'noon.t_recommendations',
         project_id='faf-starter',
         if_exists='replace'
