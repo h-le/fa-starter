@@ -69,13 +69,6 @@ class TestFirebase(absltest.TestCase):
         logged_in = firebase.logged_in(self.id_token)
         self.assertFalse(logged_in)
 
-    @mock.patch.object(firebase.auth, 'verify_id_token')
-    def test_get_song_id(self, mock_verify_id_token):
-        """Test getting song (ID) recommendation"""
-        mock_verify_id_token.return_value = self.jwt
-        song_id = firebase.get_song_id(self.id_token)
-        self.assertIsInstance(song_id, int)
-
     @mock.patch.object(firebase, 'set_like')
     @mock.patch.object(firebase.auth, 'verify_id_token')
     def test_like_song(self, mock_verify_id_token, mock_set_like):
