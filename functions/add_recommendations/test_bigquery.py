@@ -12,13 +12,11 @@ class TestBigQuery(absltest.TestCase):
             [
                 'Men I Trust',
                 'Lauren',
-                None,
                 'afternoon',
             ],
             [
                 'Men I Trust',
                 'Seven',
-                'Oncle Jazz',
                 'evening',
             ],
         ]
@@ -30,13 +28,11 @@ class TestBigQuery(absltest.TestCase):
             {
                 'artist': 'Men I Trust',
                 'title': 'Lauren',
-                'album': None,
                 'time_of_day': 'afternoon',
             },
             {
                 'artist': 'Men I Trust',
                 'title': 'Seven',
-                'album': 'Oncle Jazz',
                 'time_of_day': 'evening',
             },
         ]
