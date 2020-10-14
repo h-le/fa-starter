@@ -3,16 +3,16 @@ import pandas as pd
 import pandas_gbq as pd_gbq
 from utilities import bigquery, common, genius
 
-def get_song_metadata(info):
+def get_song_metadata(artist, title, time_of_day):
     """Get (combined) top-hit song info via Genius API using ListenBrainz info
     """
-    top_hit = genius.get_top_hit(info[0], info[1])
+    top_hit = genius.get_top_hit(artist, title)
     if not top_hit:
         return {}
     hit_artist, hit_title = common.replace_apostrophes(
         [top_hit['primary_artist']['name'], top_hit['title']]
     )
-    if (info[0].lower() != hit_artist.lower() or info[1].lower() != hit_title.lower()):
+    if (artist.lower() != hit_artist.lower() or title.lower() != hit_title.lower()):
         return {}
     hit_song_id = top_hit['id']
     song = genius.get_song(hit_song_id)
@@ -23,7 +23,7 @@ def get_song_metadata(info):
         'embed_content': song['embed_content'],
         'id': song['id'],
         'song_art_image_url': song['song_art_image_url'],
-        'time_of_day': info[3],
+        'time_of_day': time_of_day,
         'title': song['title'],
         'url': song['url'],
     }
@@ -32,7 +32,7 @@ def entry_point(request): # pylint: disable=unused-argument
     """Cloud Function Entry Point
     """
     df = pd.DataFrame( # pylint: disable=invalid-name
-        [g for g in [get_song_metadata(lbz) \
+        [g for g in [get_song_metadata(*lbz) \
             for lbz in bigquery.get_listen_brainz()] \
         if g]
     )

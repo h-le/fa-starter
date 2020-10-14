@@ -11,7 +11,6 @@ def get_listen_brainz(limit=150):
         select
             artist,
             title,
-            album,
             case
                 when (hh between 4 and 11) then 'morning'
                 when (hh between 12 and 16) then 'afternoon'
@@ -23,7 +22,6 @@ def get_listen_brainz(limit=150):
                 listened_at,
                 extract(hour from listened_at) as hh,
                 artist_name as artist,
-                release_name as album,
                 track_name as title
             from
                 `listenbrainz.listenbrainz.listen`

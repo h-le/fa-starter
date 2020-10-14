@@ -8,7 +8,6 @@ class TestMain(absltest.TestCase):
     info = [
         'Men I Trust',
         'Seven',
-        'Oncle Jazz',
         'evening',
     ]
     top_hit = {
@@ -69,7 +68,7 @@ class TestMain(absltest.TestCase):
         """Test combined song info via Genius API + ListenBrainz info"""
         mock_get_top_hit.return_value = self.top_hit
         mock_get_song.return_value = self.song
-        song_metadata = main.get_song_metadata(self.info)
+        song_metadata = main.get_song_metadata(*self.info)
         self.assertEqual(song_metadata, self.song_metadata)
 
     @mock.patch.object(main.bigquery, 'add_recommendations')
