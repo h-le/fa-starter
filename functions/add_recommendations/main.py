@@ -9,7 +9,7 @@ def get_song_metadata(info):
     top_hit = genius.get_top_hit(info[0], info[1])
     if not top_hit:
         return {}
-    hit_artist, hit_title = common.d_apostrophe(
+    hit_artist, hit_title = common.replace_apostrophes(
         [top_hit['primary_artist']['name'], top_hit['title']]
     )
     if (info[0].lower() != hit_artist.lower() or info[1].lower() != hit_title.lower()):
