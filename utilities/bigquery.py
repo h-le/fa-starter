@@ -22,9 +22,8 @@ def get_likes(id_token):
     likes = [json.loads(row[0]) for row in results]
     return likes
 
-def get_song(id_token, time_of_day, likes):
+def get_song(time_of_day, likes):
     """Get song recommendation for the logged in user."""
-    uid = auth.verify_id_token(id_token)['uid'] # pylint: disable=unused-variable
     like_ids = ','.join(
         [str(like['id']) for like in likes if like['time_of_day'] == time_of_day]
     )

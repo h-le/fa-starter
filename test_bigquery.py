@@ -141,7 +141,7 @@ class TestBigQuery(absltest.TestCase):
             }
         ]
         mock_query.return_value = expected_query_results
-        song = bigquery.get_song(self.id_token, self.time_of_day, self.likes)
+        song = bigquery.get_song(self.time_of_day, self.likes)
         self.assertEqual(song, self.song)
 
 if __name__ == '__main__':

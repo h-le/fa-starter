@@ -54,7 +54,7 @@ def get_recommendation():
         return flask.abort(401, 'User not logged in!')
     time_of_day = flask.request.args.get('time_of_day')
     likes = bigquery.get_likes(id_token)
-    song = bigquery.get_song(id_token, time_of_day, likes)
+    song = bigquery.get_song(time_of_day, likes)
     return flask.jsonify(song)
 
 @app.route('/_likes')
