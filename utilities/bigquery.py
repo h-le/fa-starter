@@ -24,20 +24,27 @@ def get_likes(id_token):
 
 def get_song(time_of_day, likes):
     """Get song recommendation for the logged in user."""
-    like_ids = ','.join(
-        [str(like['id']) for like in likes if like['time_of_day'] == time_of_day]
-    )
-    likes_string = f'\nand id not in ({like_ids})' if like_ids else ''
+    where_conditions = [
+        f'time_of_day = \'{time_of_day}\'',
+    ]
+    if likes:
+        formatted_like_ids = ', '.join(
+            str(like['id'])
+            for like in likes
+            if like['time_of_day'] == time_of_day
+        )
+        where_conditions.append(f'id not in ({formatted_like_ids})')
+    where_clause = ' and '.join(where_conditions)
     query = f'''
         select
             *
         from
             `faf-starter.noon.recommendations`
         where
-            time_of_day = '{time_of_day}'{likes_string}
+            {where_clause}
         limit
             25
     '''
     results = db.query(query, job_config=job_config)
-    song = {f[0]: f[1] for f in random.choice(list(results)).items()}
+    song = dict(random.choice(list(results)).items())
     return song
