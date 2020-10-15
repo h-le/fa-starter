@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 
 import {Observable} from 'rxjs';
 
+/* import * as moment from 'moment'; */
 import * as moment from 'moment';
 
 @Injectable({
@@ -10,16 +11,12 @@ import * as moment from 'moment';
 export class TimeService {
   constructor() {}
 
-  timeOfDay(): string {
+  timeOfDay(): string | null {
     const hour: number = +moment().format('HH');
-    return hour >= 4 && hour <= 11
-      ? 'morning'
-      : hour >= 12 && hour <= 16
-      ? 'afternoon'
-      : hour >= 17 && hour <= 21
-      ? 'evening'
-      : hour > 21 || hour < 4
-      ? 'night'
-      : 'invalid-hour';
+    if (hour >= 4 && hour <= 11) return 'morning';
+    if (hour >= 12 && hour <= 16) return 'afternoon';
+    if (hour >= 17 && hour <= 21) return 'evening';
+    if ((hour >= 22 && hour <= 23) || (hour >= 0 && hour <= 3)) return 'night';
+    return null;
   }
 }

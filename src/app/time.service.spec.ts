@@ -16,18 +16,16 @@ describe('TimeService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should get the correct time-of-day', () => {
-    const hour: number = +moment().format('HH');
-    const expectedTimeOfDay =
-      hour >= 4 && hour <= 11
-        ? 'morning'
-        : hour >= 12 && hour <= 16
-        ? 'afternoon'
-        : hour >= 17 && hour <= 21
-        ? 'evening'
-        : hour > 21 || hour < 4
-        ? 'night'
-        : 'invalid-hour';
-    expect(service.timeOfDay()).toEqual(expectedTimeOfDay);
-  });
+  for (let [hour, expectedTimeOfDay] of [
+    ['10', 'morning'],
+    ['13', 'afternoon'],
+    ['20', 'evening'],
+    ['23', 'night'],
+  ]) {
+    it(`should get the correct time-of-day at ${expectedTimeOfDay}`, () => {
+      const time = moment(`2020-01-01 ${hour}:00`, 'YYYY-DD-MM HH:mm').toDate();
+      jasmine.clock().mockDate(time);
+      expect(service.timeOfDay()).toEqual(expectedTimeOfDay);
+    });
+  }
 });
