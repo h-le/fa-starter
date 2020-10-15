@@ -25,7 +25,7 @@ def get_likes(id_token):
 def get_song(time_of_day, likes):
     """Get song recommendation for the logged in user."""
     where_conditions = [
-        f'time_of_day = \'{time_of_day}\'',
+        f"time_of_day = '{time_of_day}'",
     ]
     if likes:
         formatted_like_ids = ', '.join(
