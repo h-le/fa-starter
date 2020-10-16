@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 
 import {Observable} from 'rxjs';
 
-/* import * as moment from 'moment'; */
 import * as moment from 'moment';
 
 @Injectable({
