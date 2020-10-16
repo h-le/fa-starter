@@ -23,6 +23,7 @@ class TestFirebase(absltest.TestCase):
         'id': 2979924,
         'song_art_image_thumbnail_url': \
             'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg',
+        'time_of_day': 'afternoon',
         'title': 'Lauren',
         'url': 'https://genius.com/Men-i-trust-lauren-lyrics',
     }
@@ -39,6 +40,7 @@ class TestFirebase(absltest.TestCase):
         'id': 2979924,
         'song_art_image_thumbnail_url': \
             'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg',
+        'time_of_day': 'afternoon',
         'title': 'Lauren',
         'uid': 'u1d',
         'url': 'https://genius.com/Men-i-trust-lauren-lyrics',
@@ -68,13 +70,6 @@ class TestFirebase(absltest.TestCase):
             auth.InvalidIdTokenError('InvalidIdTokenError')
         logged_in = firebase.logged_in(self.id_token)
         self.assertFalse(logged_in)
-
-    @mock.patch.object(firebase.auth, 'verify_id_token')
-    def test_get_song_id(self, mock_verify_id_token):
-        """Test getting song (ID) recommendation"""
-        mock_verify_id_token.return_value = self.jwt
-        song_id = firebase.get_song_id(self.id_token)
-        self.assertIsInstance(song_id, int)
 
     @mock.patch.object(firebase, 'set_like')
     @mock.patch.object(firebase.auth, 'verify_id_token')

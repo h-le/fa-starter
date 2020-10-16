@@ -3,7 +3,7 @@ import os
 import flask
 import flask_cors
 from dotenv import load_dotenv
-from utilities import genius, firebase, bigquery
+from utilities import firebase, bigquery
 
 load_dotenv()
 
@@ -52,8 +52,9 @@ def get_recommendation():
     id_token = flask.request.headers['Authorization'].split(' ').pop()
     if not firebase.logged_in(id_token):
         return flask.abort(401, 'User not logged in!')
-    song_id = firebase.get_song_id(id_token)
-    song = genius.get_song(song_id)
+    time_of_day = flask.request.args.get('time_of_day')
+    likes = bigquery.get_likes(id_token)
+    song = bigquery.get_song(time_of_day, likes)
     return flask.jsonify(song)
 
 @app.route('/_likes')

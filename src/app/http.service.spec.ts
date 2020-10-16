@@ -16,6 +16,8 @@ describe('HttpService', () => {
 
   const idToken = 'idT0ken';
 
+  const timeOfDay = 'afternoon';
+
   const recommendation: Recommendation = {
     album: 'Djesse, Vol. 3',
     apple_music_player_url:
@@ -26,6 +28,7 @@ describe('HttpService', () => {
     id: 5751704,
     song_art_image_url:
       'https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg',
+    time_of_day: 'afternoon',
     title: 'Sleeping on My Dreams',
     url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
   };
@@ -41,6 +44,7 @@ describe('HttpService', () => {
     id: 5751704,
     song_art_image_url:
       'https://images.genius.com/b5f4dda4b90c2171639783c1f6eeeddb.1000x1000x1.jpg',
+    time_of_day: 'afternoon',
     title: 'Sleeping on My Dreams',
     uid: 'u1d',
     url: 'https://genius.com/Jacob-collier-sleeping-on-my-dreams-lyrics',
@@ -58,6 +62,7 @@ describe('HttpService', () => {
       id: 1929412,
       song_art_image_url:
         'https://images.genius.com/98ce1842b01c032eef50b8726fbbfba6.900x900x1.jpg',
+      time_of_day: 'night',
       title: 'Space Song',
       uid: 'u1d',
       url: 'https://genius.com/Beach-house-space-song-lyrics',
@@ -73,6 +78,7 @@ describe('HttpService', () => {
       id: 2979924,
       song_art_image_url:
         'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.1000x1000x1.jpg',
+      time_of_day: 'morning',
       title: 'Lauren',
       uid: 'u1d',
       url: 'https://genius.com/Men-i-trust-lauren-lyrics',
@@ -97,10 +103,12 @@ describe('HttpService', () => {
       const endpoint = '_recommend';
 
       httpService
-        .get<Recommendation>(idToken, endpoint)
+        .get<Recommendation>(idToken, endpoint, {time_of_day: timeOfDay})
         .subscribe(response => expect(response).toEqual(recommendation));
 
-      const req = httpMock.expectOne(environment.url + endpoint);
+      const req = httpMock.expectOne(
+        environment.url + endpoint + '?time_of_day=' + timeOfDay
+      );
       expect(req.request.method).toEqual('GET');
 
       req.flush(recommendation);
