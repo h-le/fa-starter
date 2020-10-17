@@ -29,6 +29,7 @@ else:
 # Set the secret key to enable access to session data.
 app.secret_key = os.urandom(24)
 
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve_angular(path):
@@ -46,6 +47,7 @@ def serve_angular(path):
         return flask.redirect(target)
     return flask.send_file('dist/client/index.html')
 
+
 @app.route('/_recommend')
 def get_recommendation():
     """Recommends a song via Genius API to the verified user"""
@@ -57,6 +59,7 @@ def get_recommendation():
     song = bigquery.get_song(time_of_day, likes)
     return flask.jsonify(song)
 
+
 @app.route('/_likes')
 def get_likes():
     """Gets verified user's liked songs"""
@@ -65,6 +68,7 @@ def get_likes():
         return flask.abort(401, 'User not logged in!')
     likes = bigquery.get_likes(id_token)
     return flask.jsonify(likes)
+
 
 @app.route('/_like', methods=['POST'])
 def post_like():
