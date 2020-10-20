@@ -17,7 +17,7 @@ export class LikesComponent {
   readonly likes$: Observable<Like[]>;
   readonly unliked$: Observable<Like[]>;
 
-  hoveredLikeId: number;
+  hoveredLikeId: number | null;
 
   unlikeClicked = new Subject<Like>();
 
@@ -43,7 +43,7 @@ export class LikesComponent {
         )
       )
     );
-    this.hoveredLikeId = -1;
+    this.hoveredLikeId = null;
   }
 
   /** Removes the song from the user's liked songs. */
