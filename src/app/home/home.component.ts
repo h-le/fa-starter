@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 
-import {Observable, Subject, OperatorFunction, pipe, interval} from 'rxjs';
+import {Observable, Subject, OperatorFunction, pipe} from 'rxjs';
 import {flatMap, map, startWith} from 'rxjs/operators';
 
 import {Recommendation} from '../models/recommendation.model';
