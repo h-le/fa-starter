@@ -7,16 +7,12 @@ import {LikesComponent} from './likes.component';
 import {AuthService} from '../auth.service';
 import {HttpService} from '../http.service';
 
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
 
 import {SafePipeModule} from 'safe-pipe';
 import {MaterialModule} from '../material/material.module';
 
 import {AngularFireModule} from '@angular/fire';
-import {auth} from 'firebase/app';
 
 import {Like} from '../models/like.model';
 
@@ -26,11 +22,11 @@ describe('LikesComponent', () => {
   let component: LikesComponent;
   let fixture: ComponentFixture<LikesComponent>;
 
-  let authService;
-  let httpService;
-  let authenticateWithGoogleSpy;
-  let getIdTokenSpy;
-  let getSpy;
+  let authService: any;
+  let httpService: any;
+  let authenticateWithGoogleSpy: any;
+  let getIdTokenSpy: any;
+  let getSpy: any;
 
   const idToken: string = 'idToken';
 
