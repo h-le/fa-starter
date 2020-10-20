@@ -158,7 +158,7 @@ describe('LikesComponent', () => {
   }));
 
   it('should display the header and footer for the hovered like', async(() => {
-    expect(component.hoveredLikeId).toEqual(-1);
+    expect(component.hoveredLikeId).toEqual(null);
 
     fixture.detectChanges();
 
