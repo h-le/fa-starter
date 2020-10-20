@@ -147,7 +147,7 @@ class TestFlaskApp(absltest.TestCase):
         """Test hitting the '_likes' endpoint to get user's liked songs"""
         mock_logged_in.return_value = True
         mock_get_likes.return_value = self.likes
-        response = self.api.get('/_likes', headers=self.headers)
+        response = self.api.get('/_like', headers=self.headers)
         likes = json.loads(response.text)
         self.assertEqual(response.headers['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, 200)
@@ -173,7 +173,7 @@ class TestFlaskApp(absltest.TestCase):
         mock_logged_in.return_value = True
         mock_unlike_song.return_value = self.like
         response = self.api.delete(
-            f'/_unlike?data={json.dumps(self.like)}',
+            f'/_like?data={json.dumps(self.like)}',
             headers=self.headers)
         unlike = json.loads(response.text)
         self.assertEqual(response.headers['Content-Type'], 'application/json')

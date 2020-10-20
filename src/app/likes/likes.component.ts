@@ -33,7 +33,7 @@ export class LikesComponent {
     this.likes$ = combineLatest(
       authService.authenticateWithGoogle().pipe(
         flatMap(() => authService.getIdToken()),
-        flatMap((idToken: string) => httpService.get<Like[]>(idToken, '_likes'))
+        flatMap((idToken: string) => httpService.get<Like[]>(idToken, '_like'))
       ),
       this.unliked$
     ).pipe(
@@ -54,7 +54,7 @@ export class LikesComponent {
         .pipe(map((idToken: string) => [song, idToken]))
     ),
     flatMap(([song, idToken]: [Like, string]) =>
-      this.httpService.delete<Like>(idToken, song, '_unlike')
+      this.httpService.delete<Like>(idToken, song, '_like')
     ),
     filter((song: Like) => JSON.stringify(song) !== '{}')
   );

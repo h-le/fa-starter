@@ -61,7 +61,7 @@ def get_recommendation():
     return flask.jsonify(song)
 
 
-@app.route('/_likes')
+@app.route('/_like', methods=['GET'])
 def get_likes():
     """Gets verified user's liked songs"""
     id_token = flask.request.headers['Authorization'].split(' ').pop()
@@ -82,7 +82,7 @@ def post_like():
     return flask.jsonify(like)
 
 
-@app.route('/_unlike', methods=['DELETE'])
+@app.route('/_like', methods=['DELETE'])
 def delete_like():
     """Deletes song from verified user's list of liked songs."""
     id_token = flask.request.headers['Authorization'].split(' ').pop()
