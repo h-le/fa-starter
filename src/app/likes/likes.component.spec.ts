@@ -27,6 +27,7 @@ describe('LikesComponent', () => {
   let authenticateWithGoogleSpy: any;
   let getIdTokenSpy: any;
   let getSpy: any;
+  let deleteSpy: any;
 
   const idToken: string = 'idToken';
 
@@ -76,7 +77,7 @@ describe('LikesComponent', () => {
       'getIdToken',
     ]);
 
-    httpService = jasmine.createSpyObj('HttpService', ['get']);
+    httpService = jasmine.createSpyObj('HttpService', ['get', 'delete']);
 
     authenticateWithGoogleSpy = authService.authenticateWithGoogle.and.returnValue(
       of(credential)
@@ -85,6 +86,8 @@ describe('LikesComponent', () => {
     getIdTokenSpy = authService.getIdToken.and.returnValue(of(idToken));
 
     getSpy = httpService.get.and.returnValue(of(likes));
+
+    deleteSpy = httpService.delete.and.returnValue(of(likes[0]));
 
     TestBed.configureTestingModule({
       imports: [
@@ -122,6 +125,36 @@ describe('LikesComponent', () => {
     component.likes$.subscribe(response => {
       expect(response).toEqual(likes);
     });
+  }));
+
+  it('x', async(() => {
+    fixture.detectChanges();
+
+    fixture.debugElement
+      .queryAll(By.css('.mat-grid-tile'))[0]
+      .nativeElement.dispatchEvent(new Event('mouseover'));
+
+    fixture.detectChanges();
+
+    let unlikedIndex: number = 0;
+    const expectedUnliked: Like[][] = [[], [likes[0]]];
+
+    component.unliked$.subscribe(unliked => {
+      expect(unliked).toEqual(expectedUnliked[unlikedIndex]);
+      unlikedIndex++;
+    });
+
+    let likesIndex: number = 0;
+    const expectedLikes: Like[][] = [likes, [likes[1]]];
+
+    component.likes$.subscribe(likes => {
+      expect(likes).toEqual(expectedLikes[likesIndex]);
+      likesIndex++;
+    });
+
+    fixture.debugElement.queryAll(By.css('a'))[1].nativeElement.click();
+
+    expect(deleteSpy.calls.any()).toBe(true);
   }));
 
   it('should display the liked songs', async(() => {
@@ -219,6 +252,4 @@ describe('LikesComponent', () => {
 
     expect(component.unlikeClicked.next).toHaveBeenCalled();
   }));
-
-  /* TODO Test component more */
 });
