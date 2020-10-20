@@ -22,3 +22,7 @@ h3 {
 a.mat-icon-button {
   color: white;
 }
+
+.mat-grid-tile {
+  background-size: cover;
+}

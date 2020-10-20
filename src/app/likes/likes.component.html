@@ -10,7 +10,6 @@
       *ngFor="let like of likes"
       colspan="1"
       [style.background-image]="'url(' + like.song_art_image_url + ')' | safe: 'style'"
-      style="background-size: cover;"
       (mouseover)="hoveredLikeId=like.id"
       (mouseleave)="hoveredLikeId=-1"
     >
