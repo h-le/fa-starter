@@ -108,7 +108,6 @@ describe('LikesComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(LikesComponent);
     component = fixture.componentInstance;
-    /* fixture.detectChanges(); */
   });
 
   it('should create', () => {
