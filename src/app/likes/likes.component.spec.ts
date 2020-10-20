@@ -39,6 +39,8 @@ describe('LikesComponent', () => {
     credential: {},
   };
 
+  const likeId: number = 1929412;
+
   const likes: Like[] = [
     {
       album: 'Depression Cherry',
@@ -106,7 +108,7 @@ describe('LikesComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(LikesComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    /* fixture.detectChanges(); */
   });
 
   it('should create', () => {
@@ -114,6 +116,8 @@ describe('LikesComponent', () => {
   });
 
   it('should attempt to authenticate user then get their liked songs', async(() => {
+    fixture.detectChanges();
+
     expect(authenticateWithGoogleSpy.calls.any()).toBe(true);
     expect(getIdTokenSpy.calls.any()).toBe(true);
     expect(getSpy.calls.any()).toBe(true);
@@ -126,43 +130,100 @@ describe('LikesComponent', () => {
   }));
 
   it('should display the liked songs', async(() => {
+    fixture.detectChanges();
+
     const mat_grid_list = fixture.debugElement.queryAll(
       By.css('.mat-grid-list')
     );
 
     expect(mat_grid_list).not.toEqual([]);
 
-    const anchor_list_items = fixture.debugElement.queryAll(By.css('a'));
-
-    expect(anchor_list_items.length).toEqual(likes.length);
-
-    const anchor_list_content = anchor_list_items.map(list_item => {
-      const song_artist = /(.*) by (.*)/gm.exec(
-        list_item.nativeElement.getAttribute('title')
-      );
-      if (song_artist && song_artist.length == 3) {
-        return {
-          artist: String(song_artist[2]),
-          title: String(song_artist[1]),
-          song_art_image_url: String(
-            list_item.nativeElement
-              .getElementsByClassName('mat-grid-tile')[0]
-              .style.backgroundImage.replace(/url\(\"(.*)\"\)/gm, '$1')
-          ),
-          url: String(list_item.nativeElement.getAttribute('href')),
-        };
-      }
-    });
-
-    const expected_content = likes.map(
-      ({artist, title, song_art_image_url, url}) => ({
-        artist: String(artist),
-        title: String(title),
-        song_art_image_url: String(song_art_image_url),
-        url: String(url),
-      })
+    const mat_grid_tile_items = fixture.debugElement.queryAll(
+      By.css('.mat-grid-tile')
     );
 
-    expect(anchor_list_content).toEqual(expected_content);
+    expect(mat_grid_tile_items.length).toEqual(likes.length);
+
+    const mat_grid_tile_list_content = mat_grid_tile_items.map(list_item => {
+      return {
+        song_art_image_url: String(
+          list_item.nativeElement.style.backgroundImage.replace(
+            /url\(\"(.*)\"\)/gm,
+            '$1'
+          )
+        ),
+      };
+    });
+
+    const expected_content = likes.map(({song_art_image_url}) => ({
+      song_art_image_url: String(song_art_image_url),
+    }));
+
+    expect(mat_grid_tile_list_content).toEqual(expected_content);
   }));
+
+  it('should display the header and footer for the hovered like', async(() => {
+    expect(component.hoveredLikeId).toEqual(-1);
+
+    fixture.detectChanges();
+
+    fixture.debugElement
+      .queryAll(By.css('.mat-grid-tile'))[0]
+      .nativeElement.dispatchEvent(new Event('mouseover'));
+
+    fixture.detectChanges();
+
+    expect(component.hoveredLikeId).toEqual(likeId);
+
+    for (let margin of ['header', 'footer']) {
+      const hovered_mat_grid_tile_margin = fixture.debugElement.queryAll(
+        By.css(`.mat-grid-tile-${margin}`)
+      );
+
+      expect(hovered_mat_grid_tile_margin.length).toEqual(1);
+    }
+
+    const hovered_mat_grid_tile_content = fixture.debugElement
+      .queryAll(By.css('.mat-grid-tile'))
+      .slice(0, 1)
+      .map(tile => {
+        const song_artist = /(.*) by (.*)/gm.exec(
+          tile.nativeElement.getElementsByClassName('mat-grid-tile-header')[0]
+            .innerText
+        );
+        if (song_artist && song_artist.length == 3) {
+          return {
+            artist: String(song_artist[2]),
+            title: String(song_artist[1]),
+            url: String(tile.nativeElement.getElementsByTagName('a')[0].href),
+          };
+        }
+      })[0];
+
+    const expected_content = likes.map(({artist, title, url}) => ({
+      artist: String(artist),
+      title: String(title),
+      url: String(url),
+    }))[0];
+
+    expect(hovered_mat_grid_tile_content).toEqual(expected_content);
+  }));
+
+  it('should call unlikeClicked.next() when _clear_ button clicked', async(() => {
+    spyOn(component.unlikeClicked, 'next');
+
+    fixture.detectChanges();
+
+    fixture.debugElement
+      .queryAll(By.css('.mat-grid-tile'))[0]
+      .nativeElement.dispatchEvent(new Event('mouseover'));
+
+    fixture.detectChanges();
+
+    fixture.debugElement.queryAll(By.css('a'))[1].nativeElement.click();
+
+    expect(component.unlikeClicked.next).toHaveBeenCalled();
+  }));
+
+  /* TODO Test component more */
 });

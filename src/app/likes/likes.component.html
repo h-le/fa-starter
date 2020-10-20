@@ -5,19 +5,33 @@
     [cols]="likes.length > 4 ? 4 : likes.length"
     gutterSize="2"
     rowHeight="1:1"
-    ><a
+  >
+    <mat-grid-tile
       *ngFor="let like of likes"
-      [attr.href]="like.url"
-      target="_blank"
-      title="{{like.title}} by {{like.artist}}"
+      colspan="1"
+      [style.background-image]="'url(' + like.song_art_image_url + ')' | safe: 'style'"
+      style="background-size: cover;"
+      (mouseover)="hoveredLikeId=like.id"
+      (mouseleave)="hoveredLikeId=-1"
     >
-      <mat-grid-tile
-        colspan="1"
-        [style.background-image]="'url(' + like.song_art_image_url + ')' | safe: 'style'"
-        style="background-size: cover;"
-      >
-      </mat-grid-tile>
-    </a>
+      <ng-container *ngIf="hoveredLikeId==like.id">
+        <mat-grid-tile-header
+          >{{like.title}} by {{like.artist}}</mat-grid-tile-header
+        >
+        <mat-grid-tile-footer>
+          <a
+            mat-icon-button
+            [attr.href]="like.url"
+            target="_blank"
+            title="Lyrics"
+            ><mat-icon>art_track</mat-icon></a
+          >
+          <a mat-icon-button (click)="unlikeClicked.next(like)" title="Unlike"
+            ><mat-icon>clear</mat-icon></a
+          >
+        </mat-grid-tile-footer>
+      </ng-container>
+    </mat-grid-tile>
   </mat-grid-list>
 </ng-container>
 <ng-template #loading>
