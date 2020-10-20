@@ -1,8 +1,9 @@
 """Tests for firebase.py"""
 from unittest import mock
-from absl.testing import absltest # pylint: disable=no-name-in-module
+from absl.testing import absltest  # pylint: disable=no-name-in-module
 from firebase_admin import auth
 from utilities import firebase
+
 
 class TestFirebase(absltest.TestCase):
     """Firebase Testing Class"""
@@ -13,48 +14,54 @@ class TestFirebase(absltest.TestCase):
     }
     song = {
         'album': None,
-        'apple_music_player_url': 'https://genius.com/songs/2979924/apple_music_player',
+        'apple_music_player_url':
+            'https://genius.com/songs/2979924/apple_music_player',
         'artist': 'Men I Trust',
-        'embed_content': "<div id='rg_embed_link_2979924' " \
-            "class='rg_embed_link' data-song-id='2979924'>" \
-            "Read <a href='https://genius.com/Men-i-trust-lauren-lyrics'>" \
-            "“Lauren” by Men\xa0I Trust</a> on Genius</div> <script " \
+        'embed_content':
+            "<div id='rg_embed_link_2979924' "
+            "class='rg_embed_link' data-song-id='2979924'>"
+            "Read <a href='https://genius.com/Men-i-trust-lauren-lyrics'>"
+            "“Lauren” by Men\xa0I Trust</a> on Genius</div> <script "
             "crossorigin src='//genius.com/songs/2979924/embed.js'></script>",
         'id': 2979924,
-        'song_art_image_thumbnail_url': \
-            'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg',
+        'song_art_image_thumbnail_url':
+            "https://images.genius.com/"
+            "9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg",
         'time_of_day': 'afternoon',
         'title': 'Lauren',
         'url': 'https://genius.com/Men-i-trust-lauren-lyrics',
     }
     like = {
         'album': 'Non-Album Single',
-        'apple_music_player_url': 'https://genius.com/songs/2979924/apple_music_player',
+        'apple_music_player_url':
+            'https://genius.com/songs/2979924/apple_music_player',
         'artist': 'Men I Trust',
         'email': 'moot@gmail.com',
-        'embed_content': "<div id='rg_embed_link_2979924' " \
-            "class='rg_embed_link' data-song-id='2979924'>" \
-            "Read <a href='https://genius.com/Men-i-trust-lauren-lyrics'>" \
-            "“Lauren” by Men\xa0I Trust</a> on Genius</div> <script " \
+        'embed_content':
+            "<div id='rg_embed_link_2979924' "
+            "class='rg_embed_link' data-song-id='2979924'>"
+            "Read <a href='https://genius.com/Men-i-trust-lauren-lyrics'>"
+            "“Lauren” by Men\xa0I Trust</a> on Genius</div> <script "
             "crossorigin src='//genius.com/songs/2979924/embed.js'></script>",
         'id': 2979924,
-        'song_art_image_thumbnail_url': \
-            'https://images.genius.com/9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg',
+        'song_art_image_thumbnail_url':
+            "https://images.genius.com/"
+            "9a956e5a7c0d78e8441b31bdf14dc87b.300x300x1.jpg",
         'time_of_day': 'afternoon',
         'title': 'Lauren',
         'uid': 'u1d',
         'url': 'https://genius.com/Men-i-trust-lauren-lyrics',
     }
+    liked = [mock.MagicMock()]
+    liked[0].to_dict.return_value = like
     transaction = mock.MagicMock()
 
     @classmethod
-    def setUp(cls): # pylint: disable=invalid-name
+    def setUp(cls):  # pylint: disable=invalid-name
         """Set-up
             * Mock Firestore database
-            * Mock return value for query agaist Firestore db
         """
         firebase.db = mock.MagicMock()
-        firebase.db.collection().where().where().get.return_value = []
 
     @mock.patch.object(firebase.auth, 'verify_id_token')
     def test_logged_in(self, mock_verify_id_token):
@@ -82,17 +89,45 @@ class TestFirebase(absltest.TestCase):
 
     def test_set_like(self):
         """Test transaction of adding a song"""
+        firebase.db.collection().where().where().get.return_value = []
         like = firebase.set_like(self.transaction, self.like)
         firebase.db.collection.assert_called_with(u'likes')
         firebase.db.collection() \
-            .where.assert_called_with(u'uid', u'==', u'{}'.format(self.like['uid']))
+            .where \
+            .assert_called_with(u'uid', u'==', u'{}'.format(self.like['uid']))
         firebase.db.collection() \
             .where().where.assert_called_with(u'id', u'==', self.like['id'])
         firebase.db.collection() \
-            .where().where().get.assert_called_with(transaction=self.transaction)
-        self.transaction.set.assert_called_with( \
+            .where().where() \
+            .get.assert_called_with(transaction=self.transaction)
+        self.transaction.set.assert_called_with(
             firebase.db.collection(u'likes').document(), self.like)
         self.assertEqual(like, self.like)
+
+    @mock.patch.object(firebase, 'delete_like')
+    def test_unlike_song(self, mock_delete_like):
+        """Test unliking previously liked song"""
+        mock_delete_like.return_value = self.like
+        unlike = firebase.unlike_song(self.like)
+        self.assertEqual(unlike, self.like)
+
+    def test_delete_like(self):
+        """Test transaction of deleting a like"""
+        firebase.db.collection().where().where().get.return_value = self.liked
+        unlike = firebase.delete_like(self.transaction, self.like)
+        firebase.db.collection.assert_called_with(u'likes')
+        firebase.db.collection() \
+            .where \
+            .assert_called_with(u'uid', u'==', u'{}'.format(self.like['uid']))
+        firebase.db.collection() \
+            .where().where.assert_called_with(u'id', u'==', self.like['id'])
+        firebase.db.collection() \
+            .where().where() \
+            .get.assert_called_with(transaction=self.transaction)
+        self.transaction.delete.assert_called_with(
+            self.liked[0].reference)
+        self.assertEqual(unlike, self.like)
+
 
 if __name__ == '__main__':
     absltest.main()

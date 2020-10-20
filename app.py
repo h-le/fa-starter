@@ -1,5 +1,6 @@
 """Angular, Flask, & GAE Starter App"""
 import os
+import json
 import flask
 import flask_cors
 from dotenv import load_dotenv
@@ -79,3 +80,14 @@ def post_like():
     song = flask.request.get_json()
     like = firebase.like_song(id_token, song)
     return flask.jsonify(like)
+
+
+@app.route('/_unlike', methods=['DELETE'])
+def delete_like():
+    """Deletes song from verified user's list of liked songs."""
+    id_token = flask.request.headers['Authorization'].split(' ').pop()
+    if not firebase.logged_in(id_token):
+        return flask.abort(401, 'User not logged in!')
+    like = json.loads(flask.request.args.get('data'))
+    unlike = firebase.unlike_song(like)
+    return flask.jsonify(unlike)

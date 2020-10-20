@@ -7,6 +7,7 @@ from google.cloud import bigquery
 db = bigquery.Client()
 job_config = bigquery.QueryJobConfig(use_query_cache=False)
 
+
 def get_likes(id_token):
     """Gets liked songs for the logged in user."""
     uid = auth.verify_id_token(id_token)['uid']
@@ -22,6 +23,7 @@ def get_likes(id_token):
     likes = [json.loads(row[0]) for row in results]
     return likes
 
+
 def get_song(time_of_day, likes):
     """Get song recommendation for the logged in user."""
     where_conditions = [
@@ -33,7 +35,8 @@ def get_song(time_of_day, likes):
             for like in likes
             if like['time_of_day'] == time_of_day
         )
-        where_conditions.append(f'id not in ({formatted_like_ids})')
+        if formatted_like_ids:
+            where_conditions.append(f'id not in ({formatted_like_ids})')
     where_clause = ' and '.join(where_conditions)
     query = f'''
         select
