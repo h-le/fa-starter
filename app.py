@@ -1,5 +1,6 @@
 """Angular, Flask, & GAE Starter App"""
 import os
+import json
 import flask
 import flask_cors
 from dotenv import load_dotenv
@@ -29,6 +30,7 @@ else:
 # Set the secret key to enable access to session data.
 app.secret_key = os.urandom(24)
 
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve_angular(path):
@@ -46,6 +48,7 @@ def serve_angular(path):
         return flask.redirect(target)
     return flask.send_file('dist/client/index.html')
 
+
 @app.route('/_recommend')
 def get_recommendation():
     """Recommends a song via Genius API to the verified user"""
@@ -57,7 +60,8 @@ def get_recommendation():
     song = bigquery.get_song(time_of_day, likes)
     return flask.jsonify(song)
 
-@app.route('/_likes')
+
+@app.route('/_like', methods=['GET'])
 def get_likes():
     """Gets verified user's liked songs"""
     id_token = flask.request.headers['Authorization'].split(' ').pop()
@@ -65,6 +69,7 @@ def get_likes():
         return flask.abort(401, 'User not logged in!')
     likes = bigquery.get_likes(id_token)
     return flask.jsonify(likes)
+
 
 @app.route('/_like', methods=['POST'])
 def post_like():
@@ -75,3 +80,14 @@ def post_like():
     song = flask.request.get_json()
     like = firebase.like_song(id_token, song)
     return flask.jsonify(like)
+
+
+@app.route('/_like', methods=['DELETE'])
+def delete_like():
+    """Deletes song from verified user's list of liked songs."""
+    id_token = flask.request.headers['Authorization'].split(' ').pop()
+    if not firebase.logged_in(id_token):
+        return flask.abort(401, 'User not logged in!')
+    like = json.loads(flask.request.args.get('data'))
+    unlike = firebase.unlike_song(like)
+    return flask.jsonify(unlike)

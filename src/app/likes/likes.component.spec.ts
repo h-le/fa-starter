@@ -7,16 +7,12 @@ import {LikesComponent} from './likes.component';
 import {AuthService} from '../auth.service';
 import {HttpService} from '../http.service';
 
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
 
 import {SafePipeModule} from 'safe-pipe';
 import {MaterialModule} from '../material/material.module';
 
 import {AngularFireModule} from '@angular/fire';
-import {auth} from 'firebase/app';
 
 import {Like} from '../models/like.model';
 
@@ -26,11 +22,12 @@ describe('LikesComponent', () => {
   let component: LikesComponent;
   let fixture: ComponentFixture<LikesComponent>;
 
-  let authService;
-  let httpService;
-  let authenticateWithGoogleSpy;
-  let getIdTokenSpy;
-  let getSpy;
+  let authService: any;
+  let httpService: any;
+  let authenticateWithGoogleSpy: any;
+  let getIdTokenSpy: any;
+  let getSpy: any;
+  let deleteSpy: any;
 
   const idToken: string = 'idToken';
 
@@ -38,6 +35,8 @@ describe('LikesComponent', () => {
     user: {},
     credential: {},
   };
+
+  const likeId: number = 1929412;
 
   const likes: Like[] = [
     {
@@ -78,7 +77,7 @@ describe('LikesComponent', () => {
       'getIdToken',
     ]);
 
-    httpService = jasmine.createSpyObj('HttpService', ['get']);
+    httpService = jasmine.createSpyObj('HttpService', ['get', 'delete']);
 
     authenticateWithGoogleSpy = authService.authenticateWithGoogle.and.returnValue(
       of(credential)
@@ -87,6 +86,8 @@ describe('LikesComponent', () => {
     getIdTokenSpy = authService.getIdToken.and.returnValue(of(idToken));
 
     getSpy = httpService.get.and.returnValue(of(likes));
+
+    deleteSpy = httpService.delete.and.returnValue(of(likes[0]));
 
     TestBed.configureTestingModule({
       imports: [
@@ -106,7 +107,6 @@ describe('LikesComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(LikesComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -114,6 +114,8 @@ describe('LikesComponent', () => {
   });
 
   it('should attempt to authenticate user then get their liked songs', async(() => {
+    fixture.detectChanges();
+
     expect(authenticateWithGoogleSpy.calls.any()).toBe(true);
     expect(getIdTokenSpy.calls.any()).toBe(true);
     expect(getSpy.calls.any()).toBe(true);
@@ -125,44 +127,128 @@ describe('LikesComponent', () => {
     });
   }));
 
+  it('should unlike a song, adding it to unliked$ and removing it from likes$', async(() => {
+    fixture.detectChanges();
+
+    fixture.debugElement
+      .queryAll(By.css('.mat-grid-tile'))[0]
+      .nativeElement.dispatchEvent(new Event('mouseover'));
+
+    fixture.detectChanges();
+
+    let unlikedIndex: number = 0;
+    const expectedUnliked: Like[][] = [[], [likes[0]]];
+
+    component.unliked$.subscribe(unliked => {
+      expect(unliked).toEqual(expectedUnliked[unlikedIndex]);
+      unlikedIndex++;
+    });
+
+    let likesIndex: number = 0;
+    const expectedLikes: Like[][] = [likes, [likes[1]]];
+
+    component.likes$.subscribe(likes => {
+      expect(likes).toEqual(expectedLikes[likesIndex]);
+      likesIndex++;
+    });
+
+    fixture.debugElement.queryAll(By.css('a'))[1].nativeElement.click();
+
+    expect(deleteSpy.calls.any()).toBe(true);
+  }));
+
   it('should display the liked songs', async(() => {
+    fixture.detectChanges();
+
     const mat_grid_list = fixture.debugElement.queryAll(
       By.css('.mat-grid-list')
     );
 
     expect(mat_grid_list).not.toEqual([]);
 
-    const anchor_list_items = fixture.debugElement.queryAll(By.css('a'));
+    const mat_grid_tile_items = fixture.debugElement.queryAll(
+      By.css('.mat-grid-tile')
+    );
 
-    expect(anchor_list_items.length).toEqual(likes.length);
+    expect(mat_grid_tile_items.length).toEqual(likes.length);
 
-    const anchor_list_content = anchor_list_items.map(list_item => {
-      const song_artist = /(.*) by (.*)/gm.exec(
-        list_item.nativeElement.getAttribute('title')
+    const mat_grid_tile_list_content = mat_grid_tile_items.map(list_item => {
+      return {
+        song_art_image_url: String(
+          list_item.nativeElement.style.backgroundImage.replace(
+            /url\(\"(.*)\"\)/gm,
+            '$1'
+          )
+        ),
+      };
+    });
+
+    const expected_content = likes.map(({song_art_image_url}) => ({
+      song_art_image_url: String(song_art_image_url),
+    }));
+
+    expect(mat_grid_tile_list_content).toEqual(expected_content);
+  }));
+
+  it('should display the header and footer for the hovered like', async(() => {
+    expect(component.hoveredLikeId).toEqual(null);
+
+    fixture.detectChanges();
+
+    fixture.debugElement
+      .queryAll(By.css('.mat-grid-tile'))[0]
+      .nativeElement.dispatchEvent(new Event('mouseover'));
+
+    fixture.detectChanges();
+
+    expect(component.hoveredLikeId).toEqual(likeId);
+
+    for (let margin of ['header', 'footer']) {
+      const hovered_mat_grid_tile_margin = fixture.debugElement.queryAll(
+        By.css(`.mat-grid-tile-${margin}`)
       );
-      if (song_artist && song_artist.length == 3) {
+
+      expect(hovered_mat_grid_tile_margin.length).toEqual(1);
+    }
+
+    const hovered_mat_grid_tile_content = fixture.debugElement
+      .queryAll(By.css('.mat-grid-tile'))
+      .slice(0, 1)
+      .map(tile => {
+        const song_artist = /(.*) by (.*)/gm.exec(
+          tile.nativeElement.getElementsByClassName('mat-grid-tile-header')[0]
+            .innerText
+        );
+        if (!song_artist || song_artist.length !== 3) return;
         return {
           artist: String(song_artist[2]),
           title: String(song_artist[1]),
-          song_art_image_url: String(
-            list_item.nativeElement
-              .getElementsByClassName('mat-grid-tile')[0]
-              .style.backgroundImage.replace(/url\(\"(.*)\"\)/gm, '$1')
-          ),
-          url: String(list_item.nativeElement.getAttribute('href')),
+          url: String(tile.nativeElement.getElementsByTagName('a')[0].href),
         };
-      }
-    });
+      })[0];
 
-    const expected_content = likes.map(
-      ({artist, title, song_art_image_url, url}) => ({
-        artist: String(artist),
-        title: String(title),
-        song_art_image_url: String(song_art_image_url),
-        url: String(url),
-      })
-    );
+    const expected_content = likes.map(({artist, title, url}) => ({
+      artist: String(artist),
+      title: String(title),
+      url: String(url),
+    }))[0];
 
-    expect(anchor_list_content).toEqual(expected_content);
+    expect(hovered_mat_grid_tile_content).toEqual(expected_content);
+  }));
+
+  it('should call unlikeClicked.next() when _clear_ button clicked', async(() => {
+    spyOn(component.unlikeClicked, 'next');
+
+    fixture.detectChanges();
+
+    fixture.debugElement
+      .queryAll(By.css('.mat-grid-tile'))[0]
+      .nativeElement.dispatchEvent(new Event('mouseover'));
+
+    fixture.detectChanges();
+
+    fixture.debugElement.queryAll(By.css('a'))[1].nativeElement.click();
+
+    expect(component.unlikeClicked.next).toHaveBeenCalled();
   }));
 });

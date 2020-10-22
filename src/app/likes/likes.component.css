@@ -18,3 +18,11 @@ h3 {
   margin-top: 3vh;
   width: 75%;
 }
+
+a.mat-icon-button {
+  color: white;
+}
+
+.mat-grid-tile {
+  background-size: cover;
+}

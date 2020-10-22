@@ -149,6 +149,25 @@ describe('HttpService', () => {
     }
   ));
 
+  it('should request to _unlike_ the given song and return the same _like_', inject(
+    [HttpTestingController, HttpService],
+    (httpMock: HttpTestingController, httpService: HttpService) => {
+      const endpoint = '_unlike';
+
+      httpService
+        .delete<Like>(idToken, like, endpoint)
+        .subscribe(response => expect(response).toEqual(like));
+
+      const req = httpMock.expectOne(
+        encodeURI(environment.url + endpoint + '?data=' + JSON.stringify(like))
+      );
+
+      expect(req.request.method).toEqual('DELETE');
+
+      req.flush(like);
+    }
+  ));
+
   afterEach(inject(
     [HttpTestingController],
     (httpMock: HttpTestingController) => {
