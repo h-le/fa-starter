@@ -219,13 +219,12 @@ describe('LikesComponent', () => {
           tile.nativeElement.getElementsByClassName('mat-grid-tile-header')[0]
             .innerText
         );
-        if (song_artist && song_artist.length == 3) {
-          return {
-            artist: String(song_artist[2]),
-            title: String(song_artist[1]),
-            url: String(tile.nativeElement.getElementsByTagName('a')[0].href),
-          };
-        }
+        if (!song_artist || song_artist.length !== 3) return;
+        return {
+          artist: String(song_artist[2]),
+          title: String(song_artist[1]),
+          url: String(tile.nativeElement.getElementsByTagName('a')[0].href),
+        };
       })[0];
 
     const expected_content = likes.map(({artist, title, url}) => ({
