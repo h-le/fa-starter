@@ -127,7 +127,7 @@ describe('LikesComponent', () => {
     });
   }));
 
-  it('x', async(() => {
+  it('should unlike a song, adding it to unliked$ and removing it from likes$', async(() => {
     fixture.detectChanges();
 
     fixture.debugElement
