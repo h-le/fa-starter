@@ -6,7 +6,7 @@ To get started:
 - Run `npm install` from this folder
 - Run `python -m pip install -r requirements.txt`
   - Use python3
-  - You may use a [venv](https://docs.python.org/3/library/venv.html).
+  - You may use a [venv](https://docs.python.org/3/library/venv.html)
 
 To run in development mode:
 
